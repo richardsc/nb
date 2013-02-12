@@ -43,21 +43,29 @@ picked because it is not a unix command.)
 
 ## Development steps
 
-1. Month 1: the author develops a few alpha versions as a unix CLI tool,
-   probably using python and probably using dropbox for ubiquity across
-platforms.  At the same time, he invites other interested parties to think
-about what sort of categories of information should be stored in the
-application.  For example, the database (as described in a section below) has
-items called ``tags``.  Maybe it also should have an item called ``priority``,
-for example.  The first step is to set up the database with content that will
-be useful *in practice*, and not in some abstract sense.  For example, tags
-really seem to be essential, so they should definitely go in.
+1. Month 1.  By the end of this period, the tool's function and database
+   structure should be fairly clear.  Reasonable development steps (perhaps not
+in order) are:
 
-2. Month 2: the author invites other unix users to experiment with the
-   python-based CLI tool.  By then a web tool may also be working (using
-django, probably) and in that case the call for invitations can be wider.
+    a. The author invites others to think about what such a tool should do,
+probably by pointing them at a github development site.
+    b. The author develops a few alpha versions as a unix CLI tool, probably
+using python and probably using dropbox for ubiquity across platforms.  I till
+make sense to dogfood the code (to use the tool to take notes on SQL, for
+example).
+    c. The author invites other interested parties to think about what sort of
+categories of information should be stored in the application.  For example,
+the database (as described in a section below) has items called ``tags``.
+Maybe it also should have an item called ``priority``, for example.  The first
+step is to set up the database with content that will be useful *in practice*,
+and not in some abstract sense.  For example, tags really seem to be essential,
+so they should definitely go in.
+    d. The author starts work on a web version of the tool (probably using django).
 
-3. Eventually: mobile versions, the first probably on iphone.
+2. Month 2: the author invites other unix users to experiment with the CLI or
+   web versions of the tool.
+
+3. Later months: mobile versions, the first probably on iphone.
 
 
 ## Some early thoughts on database structure
@@ -95,6 +103,9 @@ Cut/paste the following to the sqlite console.
     INSERT INTO note (authorId, date, title, content, views) VALUES (1, date('now'), 'MIT physics lectures by Water Lewin', 'http://ocw.mit.edu/courses/physics/8-01-physics-i-classical-mechanics-fall-1999/index.htm', 0);
     INSERT INTO notetag(noteid, tagid) VALUES (2, 1);
     INSERT INTO notetag(noteid, tagid) VALUES (2, 3);
+    INSERT INTO tag(tag) VALUES ("note aggregator");
+    INSERT INTO note (authorId, date, title, content, views) VALUES (1, date('now'), 'need feedback on database categories', 'Asked DB, DI and CR.', 0);
+    INSERT INTO notetag(noteid, tagid) VALUES (3, 4);
     COMMIT;
 
 and type control-D to exit the database console.
@@ -119,11 +130,11 @@ Get IDs of the notes relating to tag number 1 ("lectures")
 
 Get the content of all notes tagged 'lecture' (tagid=1)
 
-    select content from note LEFT JOIN notetag ON notetag.noteId = note.noteId WHERE notetag.tagId=1;
+    select content from note LEFT JOIN notetag ON notetag.noteid = note.noteid WHERE notetag.tagid=1;
 
-Get the content of all notes tagged 'R' (tagid=2)
+Get content of notes tagged 'R' (tagid=2)
 
-    select content from note LEFT JOIN notetag ON notetag.noteId = note.noteId WHERE notetag.tagId=2;
+    select content from note LEFT JOIN notetag ON notetag.noteid = note.noteid WHERE notetag.tagid=2;
 
 Get content of notes tagged 'lecture' (1) and also 'R' (2)
 
