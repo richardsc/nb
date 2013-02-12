@@ -91,6 +91,10 @@ Cut/paste the following to the sqlite console.
     INSERT INTO note (authorId, date, title, content, views) VALUES (1, date('now'), 'John Cook lecture on R', 'http://channel9.msdn.com/Events/Lang-NEXT/Lang-NEXT-2012/Why-and-How-People-Use-R', 0);
     INSERT INTO notetag(noteid, tagid) VALUES (1, 1);
     INSERT INTO notetag(noteid, tagid) VALUES (1, 2);
+    INSERT INTO tag(tag) VALUES ("physics");
+    INSERT INTO note (authorId, date, title, content, views) VALUES (1, date('now'), 'MIT physics lectures by Water Lewin', 'http://ocw.mit.edu/courses/physics/8-01-physics-i-classical-mechanics-fall-1999/index.htm', 0);
+    INSERT INTO notetag(noteid, tagid) VALUES (2, 1);
+    INSERT INTO notetag(noteid, tagid) VALUES (2, 3);
     COMMIT;
 
 and type control-D to exit the database console.
@@ -107,14 +111,18 @@ Start an sqlite3 session
 
     sqlite3 na.db
 
-and then try
+and then try e.g.
+
+* IDs of the notes relating to tag number 1 ("lectures")
+
+    select noteid from notetag where tagid=1;
+
+* Content of those notes
 
    select content from note inner join notetag noteid on tagid = 1;
 
-to see notes that are tagged with tag number 1.  Try
+NOTE: some of the above is wrong.  I'm blanking on the JOIN methods -- have to
+look up how I've donw that for other work.
 
-    select content,date from note inner join notetag noteid on tagid = 1;
-
-to get the notes, and the dates of those notes.
 
 
