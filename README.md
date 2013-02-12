@@ -47,8 +47,11 @@ picked because it is not a unix command.)
    probably using python and probably using dropbox for ubiquity across
 platforms.  At the same time, he invites other interested parties to think
 about what sort of categories of information should be stored in the
-application (which is an important thing because the code is hooked to database
-design, so changes in the latter can waste programming effort).  .  
+application.  For example, the database (as described in a section below) has
+items called ``tags``.  Maybe it also should have an item called ``priority``,
+for example.  The first step is to set up the database with content that will
+be useful *in practice*, and not in some abstract sense.  For example, tags
+really seem to be essential, so they should definitely go in.
 
 2. Month 2: the author invites other unix users to experiment with the
    python-based CLI tool.  By then a web tool may also be working (using
