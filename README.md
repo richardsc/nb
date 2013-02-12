@@ -140,5 +140,12 @@ the union operation required for an 'and' on keywords.
 
 2. ``test2.py`` tests an *and* operation between tags.
 
-3. ``test3.py`` a python script to parse commandline flags.
+3. ``test3.py`` python script to parse commandline flags.
 
+4. ``test4.py`` python script to find notes matching specified tags.
+
+5. ``test5.py`` (not written yet) python scrip to add a note.
+
+*To do.* invent a good syntax for boolean operations on args, perhaps just e.g.
+``--tags a+b`` and ``--tags a|b``.  (It's not good to use ``&`` for logical
+AND, because that will require escaping in the unix shell.)

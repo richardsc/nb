@@ -1,13 +1,9 @@
 #!/usr/bin/python
 
-# some refs I consulted, with the best given first:
-# http://docs.python.org/2/library/sqlite3.html
-# http://zetcode.com/db/sqlitepythontutorial/
-
 import sqlite3 as sqlite
 import sys
 
-## demonstrate looking up content by (a single) tag
+## demonstrate looking up content by tags
 filename = "na.db"
 tags = ("lecture", "R")
 
