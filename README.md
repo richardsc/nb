@@ -138,3 +138,5 @@ Only if this proves to be a bottleneck (for very large databases, perhaps) will
 it make a lot of sense to do things in SQL.  So far, ``test1.py`` is not doing
 the union operation required for an 'and' on keywords.
 
+2. ``test2.py`` tests an *and* operation between tags.
+
