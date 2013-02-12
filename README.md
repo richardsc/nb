@@ -140,3 +140,5 @@ the union operation required for an 'and' on keywords.
 
 2. ``test2.py`` tests an *and* operation between tags.
 
+3. ``test3.py`` a python script to parse commandline flags.
+
