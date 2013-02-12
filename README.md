@@ -43,30 +43,36 @@ picked because it is not a unix command.)
 
 ## Development steps
 
-1. author develops version 1 as a unix CLI tool, perhaps using dropbox for
-ubiquity across unix platforms
+1. Month 1: the author develops a few alpha versions as a unix CLI tool,
+   probably using python and probably using dropbox for ubiquity across
+platforms.  At the same time, he invites other interested parties to think
+about what sort of categories of information should be stored in the
+application (which is an important thing because the code is hooked to database
+design, so changes in the latter can waste programming effort).  .  
 
-2. author invites other unix users to experiment (e.g. to see if the
-functionality needs adjustment)
+2. Month 2: the author invites other unix users to experiment with the
+   python-based CLI tool.  By then a web tool may also be working (using
+django, probably) and in that case the call for invitations can be wider.
 
-3. iphone app
-
-4. other apps
+3. Eventually: mobile versions, the first probably on iphone.
 
 
-## sql ideas
+## Some early thoughts on database structure
 
-To get a skeleton of the idea (and to get ideas on what should go in the database) unix CLI users can do as follows.  
+Rather than explain the idea of the structure, it makes sense to simply provide
+the SQL syntax to create and display it.  That way, experienced readers can
+make concrete suggestions.
 
-## set up database
+### Set up database
 
 At commandline type
 
-    sqlite3 an.db
+    sqlite3 na.db
 
-to open up a sqlite console on a database named ``an.db``.
+to open up a sqlite console on a database named ``an.db``.  (If there is no
+such file, it creates one.)
 
-## add some test content
+### Add some test content
 
 Cut/paste the following to the sqlite console.
 
@@ -86,11 +92,26 @@ Cut/paste the following to the sqlite console.
 
 and type control-D to exit the database console.
 
-## See results
+### See whole database
 
 At the CLI type the following to see the database content.
 
-    echo ".dump" | sqlite3 an.db
+    echo ".dump" | sqlite3 na.db
 
+### Search for an item.
+
+Start an sqlite3 session
+
+    sqlite3 na.db
+
+and then try
+
+   select content from note inner join notetag noteid on tagid = 1;
+
+to see notes that are tagged with tag number 1.  Try
+
+    select content,date from note inner join notetag noteid on tagid = 1;
+
+to get the notes, and the dates of those notes.
 
 
