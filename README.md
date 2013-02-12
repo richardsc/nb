@@ -103,6 +103,9 @@ Cut/paste the following to the sqlite console.
     INSERT INTO tag(tag) VALUES ("note aggregator");
     INSERT INTO note (authorId, date, title, content, views) VALUES (1, date('now'), 'need feedback on database categories', 'Asked DB, DI and CR.', 0);
     INSERT INTO notetag(noteid, tagid) VALUES (3, 4);
+    INSERT INTO note (authorID, date, title, content, views) VALUES (1, date('now'), 'Q on SQL', 'http://stackoverflow.com/questions/14836568/sql-join-with-boolean-on-where', 0);
+    INSERT INTO tag(tag) VALUES ('SQL');
+    INSERT INTO notetag(noteid, tagid) VALUES (4, 5);
     COMMIT;
 
 and type control-D to exit the database console.
@@ -129,9 +132,9 @@ Get the content of all notes tagged 'lecture' (tagid=1)
 
     select content from note LEFT JOIN notetag ON notetag.noteid = note.noteid WHERE notetag.tagid=1;
 
-Get content of notes tagged 'R' (tagid=2)
+Get content of notes tagged 'SQL' (tagid=5)
 
-    select content from note LEFT JOIN notetag ON notetag.noteid = note.noteid WHERE notetag.tagid=2;
+    select content from note LEFT JOIN notetag ON notetag.noteid = note.noteid WHERE notetag.tagid=5;
 
 Get content of notes tagged 'lecture' (1) and also 'R' (2)
 
