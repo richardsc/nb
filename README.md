@@ -125,3 +125,16 @@ Get content of notes tagged 'lecture' (1) and also 'R' (2)
 
     FIXME: figure this out
 
+## Development notes
+
+These notes will probably not be useful to anyone but the developer, and things
+will get deleted as they are no longer needed.  Thus, this is a sort of scratch
+area.
+
+1. ``test1.py`` tests looking up notes matching tags in python.  This seems
+   preferable to constructing complicated queries, because it will save
+learning.  Basically, the idea is to get the logic into a high level language.
+Only if this proves to be a bottleneck (for very large databases, perhaps) will
+it make a lot of sense to do things in SQL.  So far, ``test1.py`` is not doing
+the union operation required for an 'and' on keywords.
+
