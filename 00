@@ -1,0 +1,4 @@
+select Topic from Topics LEFT JOIN Requests ON requests.TopicID = Topics.id WHERE Requests.MemberID=$id ORDER BY Topic;
+
+select content from note LEFT JOIN notetag ON notetag.noteId = note.noteId WHERE notetag.tagid=1;
+

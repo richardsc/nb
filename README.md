@@ -117,10 +117,15 @@ Get IDs of the notes relating to tag number 1 ("lectures")
 
     select noteid from notetag where tagid=1;
 
-Get the content of those notes (there is an error below -- I'll fix this in an hour):
+Get the content of all notes tagged 'lecture' (tagid=1)
 
-    select content from note inner join notetag noteid on tagid = 1;
+    select content from note LEFT JOIN notetag ON notetag.noteId = note.noteId WHERE notetag.tagId=1;
 
+Get the content of all notes tagged 'R' (tagid=2)
 
+    select content from note LEFT JOIN notetag ON notetag.noteId = note.noteId WHERE notetag.tagId=2;
 
+Get content of notes tagged 'lecture' (1) and also 'R' (2)
+
+    FIXME: figure this out
 
