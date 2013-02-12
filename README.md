@@ -105,21 +105,21 @@ At the CLI type the following to see the database content.
 
     echo ".dump" | sqlite3 na.db
 
-### Search for an item.
+### Search for an item
 
 Start an sqlite3 session
 
     sqlite3 na.db
 
-and then try e.g.
+and then try e.g. as follows
 
-* IDs of the notes relating to tag number 1 ("lectures")
+### IDs of the notes relating to tag number 1 ("lectures")
 
     select noteid from notetag where tagid=1;
 
-* Content of those notes
+### Content of those notes
 
-   select content from note inner join notetag noteid on tagid = 1;
+    select content from note inner join notetag noteid on tagid = 1;
 
 NOTE: some of the above is wrong.  I'm blanking on the JOIN methods -- have to
 look up how I've donw that for other work.
