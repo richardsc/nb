@@ -34,3 +34,6 @@ nosetests.xml
 .project
 .pydevproject
 na.db
+# I like files starting with 0 for scratch work
+0*
+
