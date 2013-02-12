@@ -46,25 +46,22 @@ picked because it is not a unix command.)
 1. Month 1.  By the end of this period, the tool's function and database
    structure should be fairly clear.  Reasonable development steps (perhaps not
 in order) are:
-
-    a. The author invites others to think about what such a tool should do,
+  1. The author invites others to think about what such a tool should do,
 probably by pointing them at a github development site.
-    b. The author develops a few alpha versions as a unix CLI tool, probably
+  2. The author develops a few alpha versions as a unix CLI tool, probably
 using python and probably using dropbox for ubiquity across platforms.  I till
 make sense to dogfood the code (to use the tool to take notes on SQL, for
 example).
-    c. The author invites other interested parties to think about what sort of
+  3. The author invites other interested parties to think about what sort of
 categories of information should be stored in the application.  For example,
 the database (as described in a section below) has items called ``tags``.
 Maybe it also should have an item called ``priority``, for example.  The first
 step is to set up the database with content that will be useful *in practice*,
 and not in some abstract sense.  For example, tags really seem to be essential,
 so they should definitely go in.
-    d. The author starts work on a web version of the tool (probably using django).
-
+  4. The author starts work on a web version of the tool (probably using django).
 2. Month 2: the author invites other unix users to experiment with the CLI or
    web versions of the tool.
-
 3. Later months: mobile versions, the first probably on iphone.
 
 
