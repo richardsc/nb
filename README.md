@@ -127,9 +127,11 @@ Get content of notes tagged 'lecture' (1) and also 'R' (2)
 
 ## Development notes
 
-These notes will probably not be useful to anyone but the developer, and things
-will get deleted as they are no longer needed.  Thus, this is a sort of scratch
-area.
+These notes will probably not be useful to anyone but the developer.  Mostly,
+they will name and describe a series of test scripts for creating and working
+with the database.  The scripts will generally be orthogonal (testing different
+things), with integration of results coming only after the simpler tests have
+revealed working methods for isolated tasks.
 
 1. ``test1.py`` tests looking up notes matching tags in python.  This seems
    preferable to constructing complicated queries, because it will save
@@ -148,8 +150,8 @@ the union operation required for an 'and' on keywords.
 
         python test5.py --title "an R lecture" --tag "lecture,R" --content "put content here"
 
-6. ``test5.py`` create tags if non-extant
+6. ``test6.py`` (not written yet) create tags if non-extant
 
-*To do.* invent a good syntax for boolean operations on args, perhaps just e.g.
-``--tags a+b`` and ``--tags a|b``.  (It's not good to use ``&`` for logical
-AND, because that will require escaping in the unix shell.)
+*To do.* invent an easily-understood syntax for boolean operations on args,
+perhaps just e.g.  ``--tags a+b`` and ``--tags a|b``.  (It's not good to use
+``&`` for logical AND, because that will require escaping in the unix shell.)
