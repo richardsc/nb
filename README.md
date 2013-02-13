@@ -144,7 +144,11 @@ the union operation required for an 'and' on keywords.
 
 4. ``test4.py`` python script to find notes matching specified tags.
 
-5. ``test5.py`` (not written yet) python scrip to add a note.
+5. ``test5.py`` python script to add a note.  Try this with e.g. 
+
+        python test5.py --title "an R lecture" --tag "lecture,R" --content "put content here"
+
+6. ``test5.py`` create tags if non-extant
 
 *To do.* invent a good syntax for boolean operations on args, perhaps just e.g.
 ``--tags a+b`` and ``--tags a|b``.  (It's not good to use ``&`` for logical
