@@ -10,6 +10,12 @@ them, comment upon them, make links between them, etc.  Notes should be
 accessible from a variety of devices, which calls for a cloud-like storage
 mechanism.
 
+NB. on apple devices, the cloud is at e.g. (for Preview) ``~/Library/Mobile\
+Documents/com~apple~Preview/Documents`` but it's not clear whether special
+actions must be undertaken to set up a subdirectory in this area.  Possibly
+[this appleinsideer
+essay](http://appleinsider.com/articles/11/11/02/hidden_drop_box_feature_in_mac_os_x_lion_lets_you_sync_files_across_macs)
+will say more.
 
 ## Name
 
