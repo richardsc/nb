@@ -156,7 +156,14 @@ the union operation required for an 'and' on keywords.
 
         python test5.py --title "an R lecture" --tag "lecture,R" --content "put content here"
 
-6. ``test6.py`` (not written yet) create tags if non-extant
+6. ``test6.py`` create tags if non-extant [supplants ``test5.py``]
+
+        python test6.py --title "oceanpython lecture" --tag "lecture,python" --content "Diego gave a great talk"
+
+The version ``test6.py`` is probably 90% of what is needed for script to create
+notes.  I am tempted to call it ``na`` (for note add) and to start coding
+``nf`` (for note find).  Probably before doing that, though, I should set this
+up as a python library, so that e.g. a webpage could easily look things up.
 
 *To do.* invent an easily-understood syntax for boolean operations on args,
 perhaps just e.g.  ``--tags a+b`` and ``--tags a|b``.  (It's not good to use
