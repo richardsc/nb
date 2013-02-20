@@ -168,3 +168,16 @@ the union operation required for an 'and' on keywords.
 *To do.* invent an easily-understood syntax for boolean operations on args,
 perhaps just e.g.  ``--keyword a+b`` and ``--keyword a|b``.  (It's not good to use
 ``&`` for logical AND, because that will require escaping in the unix shell.)
+
+
+## For contributors
+
+To get started, try doing
+
+    make
+
+here, which will create a database (*warning*: it also deletes an existing one!) and then do
+
+    make test
+
+to query that database.
