@@ -1,4 +1,4 @@
-# Idea for a new app (provisionally named 'na')
+# Idea for a new open-source note-taking app (provisionally named 'na')
 
 ## Overview
 
@@ -161,8 +161,9 @@ the union operation required for an 'and' on keywords.
 
         python test6.py --title "oceanpython lecture" --keyword "lecture,python" --content "Diego gave a great talk"
 
+7. ``test7.py`` first trial with a module (a necessary step for web work)
 
-7. ``na.py`` first version that produces useful results.  When major changes to
+8. ``na.py`` first version that produces useful results.  When major changes to
    this are done, a new ``test*.py`` is created first.  
 
 *To do.* invent an easily-understood syntax for boolean operations on args,
