@@ -1,9 +1,8 @@
 #!/usr/bin/python
 
 '''
-python test6.py --action add --title "oceanpython lecture" --keyword "lecture,python" --content "Diego gave a great talk"
-python test6.py --action find --keyword "lecture"
-python test6.py --action find --keyword "lecture+R"
+./na --action add --title "oceanpython lecture" --keyword "lecture,python" --content "Diego gave a great talk"
+./na --action find --keyword "lecture"
 '''
 
 filename = "na.db"
@@ -13,7 +12,6 @@ import argparse
 import datetime
 import sys
 parser = argparse.ArgumentParser()
-#parser.add_argument("string", metavar="action", type=str, help="add a note")
 parser.add_argument('--action', type=str, help="action ('add' or 'find')", choices=['add', 'find'])
 parser.add_argument("--title", type=str, help="title (short)")
 parser.add_argument("--keyword", type=str, help="comma-separated keywords")
@@ -98,13 +96,17 @@ if args.action == "find":
         if debug:
             print "noteIds:", noteIds, "\n"
     for n in noteIds:
-        cmd = "SELECT noteId, title, content FROM note WHERE noteId=%s;" % n
+        cmd = "SELECT noteId, date, title, content, privacy FROM note WHERE noteId=%s;" % n
         if debug:
             print cmd
         cur.execute(cmd)
         res = cur.fetchone()
-        print "[%s] %s" % (res[0], res[1])
-        print "   ", res[2]
+        if res[4]:
+            privacy = "(Private)"
+        else:
+            privacy = ""
+        print "<%s %s> %s %s" % (res[0], res[1], res[2], privacy)
+        print "   ", res[3]
 
 con.commit()
 con.close()
