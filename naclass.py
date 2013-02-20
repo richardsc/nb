@@ -4,7 +4,7 @@ import sqlite3 as sqlite
 import datetime
 
 class na:
-    def __init__(self, filename="na.db", authorId=1):
+    def __init__(self, filename="na.db", authorId=1, debug=0):
         con = sqlite.connect(filename)
         if not con:
             print "error opening connection"
@@ -12,7 +12,7 @@ class na:
         self.con = con
         self.cur = con.cursor()
         self.authorId = authorId
-        self.debug = 0
+        self.debug = debug 
 
     def add(self, title, keywords, content):
         now = datetime.datetime.now()
