@@ -10,6 +10,7 @@
 from naclass import na
 import argparse
 import sys
+import json
 
 parser = argparse.ArgumentParser()
 parser.add_argument('action', choices=['add', 'find'])
@@ -26,25 +27,26 @@ args.keywords = args.keywords.split(',')
 na = na(debug=args.debug)
 
 if args.json:
-    import json
     for line in open(args.json, "r"):
+        line = line.rstrip()
         if (len(line)) > 1:
             try:
-                json = json.loads(line)
+                j = json.loads(line)
             except:
-                pass
-            if 'title' not in json:
+                print "JSON file is not in proper format on line: %s" % line
                 sys.exit(1)
-            if 'content' not in json:
-                json['content'] = ""
-            if 'keyword' in json:
-                keyword = json['keyword'].split(',')
+            if 'title' not in j:
+                sys.exit(1)
+            if 'content' not in j:
+                j['content'] = ""
+            if 'keywords' in j:
+                keyword = j['keywords'].split(',')
             else:
                 keyword = ''
-            if 'privacy' not in json:
-                json['privacy'] = 0
-            json['keyword'].split(',')
-            id = na.add(title=json['title'], keywords=keyword, content=json['content'], privacy=json['privacy'])
+            if 'privacy' not in j:
+                j['privacy'] = 0
+            j['keywords'].split(',')
+            id = na.add(title=j['title'], keywords=keyword, content=j['content'], privacy=j['privacy'])
     sys.exit(0)
 
 if args.title:

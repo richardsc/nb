@@ -39,7 +39,6 @@ class na:
                 # FIXME: should check whether the insertion worked
             self.sql("INSERT INTO notekeyword(noteId, keywordID) VALUES(%d, %d)" % (noteId, keywordId))
         self.con.commit()
-        self.con.close()
         return(noteId)
    
     def find(self, keywords=""):
@@ -72,6 +71,5 @@ class na:
             for k in keys:
                 keywords.append(self.sql("SELECT keyword FROM keyword WHERE keywordId = %d;" % k, one=True)[0])
             print " ", ", ".join(keywords[i] for i in range(len(keywords))), "\n"
-        self.con.close()
 
  
