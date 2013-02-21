@@ -43,9 +43,13 @@ class na:
             self.cur.execute(cmd)
         self.con.commit()
         self.con.close()
+        return(noteId)
    
     def find(self, keywords):
         noteIds = []
+        if keywords[0] == "?":
+            print "should dump whole database now (with a JOIN to get keywords)"
+            return
         for keyword in keywords:
             if self.debug:
                 print "keyword:", keyword, "..."
@@ -77,7 +81,8 @@ class na:
                 privacy = "(Private)"
             else:
                 privacy = ""
-            print "<%s %s> %s %s" % (res[0], res[1], res[2], privacy)
-            print "   ", res[3]
+            print "<%s %s> %s %s\n  %s" % (res[0], res[1], res[2], privacy, res[3])
         self.con.close()
+        print "FIXME: should show keywords here"
+
  

@@ -36,7 +36,8 @@ else:
 
 na = na(debug=args.debug)
 if args.action == "add":
-    na.add(title, keywords, content)
+    id = na.add(title, keywords, content)
+    print "id:", id
 
 if args.action == "find":
     na.find(keywords)
