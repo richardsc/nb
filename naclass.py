@@ -82,7 +82,20 @@ class na:
             else:
                 privacy = ""
             print "<%s %s> %s %s\n  %s" % (res[0], res[1], res[2], privacy, res[3])
+            # Next bit should be done with a join, I think
+            cmd = "SELECT keywordid FROM notekeyword WHERE notekeyword.noteid = %d" % n
+            if self.debug:
+                print cmd
+            self.cur.execute(cmd)
+            keys = self.cur.fetchall()
+            keywords = []
+            for k in keys:
+                cmd = "SELECT keyword FROM keyword WHERE keywordid = %d" % k
+                if self.debug:
+                    print cmd
+                self.cur.execute(cmd)
+                keywords.append(self.cur.fetchone()[0])
+            print " ", ", ".join(keywords[i] for i in range(len(keywords))), "\n"
         self.con.close()
-        print "FIXME: should show keywords here"
 
  
