@@ -81,7 +81,7 @@ so they should definitely go in.
 
 #### Add a note
 
-    ./na --action add --title "oceanpython lecture" --keyword "lecture,python" --content "Diego gave a great talk"
+    ./na --action add --title "oceanpython lecture" --keyword "lecture,python,diego" --content "Diego now speaks twice per week"
 
 #### Find a note by keyword
 
