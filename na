@@ -9,19 +9,17 @@ from naclass import na
 import argparse
 
 parser = argparse.ArgumentParser()
+parser.add_argument('action', choices=['add', 'find'])
 parser.add_argument('--action', type=str, help="action ('add' or 'find')", choices=['add', 'find'])
-parser.add_argument("--title", type=str, help="title (short)")
-parser.add_argument("--keyword", type=str, help="comma-separated keywords")
-parser.add_argument("--content", type=str, help="content (long; markdown format)")
+parser.add_argument("--title", type=str, default="", help="title (short)")
+parser.add_argument("--keywords", type=str, default="", help="comma-separated keywords")
+parser.add_argument("--content", type=str, default="", help="content (long; markdown format)")
 parser.add_argument("--debug", action="store_true", dest="debug", default=False, help="set debugging on")
 parser.add_argument("--privacy", type=int, default=0, help="set privacy level (0=open, 1=closed)")
 args = parser.parse_args()
 
-if args.keyword:
-    if args.action=="add":
-        keywords = args.keyword.split(',')
-    else:
-        keywords = args.keyword.split(',') # FIXME: allow also |
+args.keywords = args.keywords.split(',')
+
 if args.title:
     if args.action != "add":
         print "warning: --title is ignored unless --action!='add'"
@@ -37,9 +35,9 @@ else:
 
 na = na(debug=args.debug)
 if args.action == "add":
-    id = na.add(title, keywords, content, args.privacy)
+    id = na.add(title=args.title, keywords=args.keywords, content=args.content, privacy=args.privacy)
     print "id:", id
 
 if args.action == "find":
-    na.find(keywords)
+    na.find(keywords=args.keywords)
 
