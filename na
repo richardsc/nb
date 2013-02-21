@@ -9,10 +9,11 @@
 
 from naclass import na
 import argparse
+import sys
 
 parser = argparse.ArgumentParser()
 parser.add_argument('action', choices=['add', 'find'])
-parser.add_argument('--action', type=str, help="action ('add' or 'find')", choices=['add', 'find'])
+parser.add_argument('--json', type=str, help="file containing JSON-formatted 'title', 'content' and 'keyword'")
 parser.add_argument("--title", type=str, default="", help="title (short)")
 parser.add_argument("--keywords", type=str, default="", help="comma-separated keywords")
 parser.add_argument("--content", type=str, default="", help="content (long; markdown format)")
@@ -21,6 +22,30 @@ parser.add_argument("--privacy", type=int, default=0, help="set privacy level (0
 args = parser.parse_args()
 
 args.keywords = args.keywords.split(',')
+
+na = na(debug=args.debug)
+
+if args.json:
+    import json
+    for line in open(args.json, "r"):
+        if (len(line)) > 1:
+            try:
+                json = json.loads(line)
+            except:
+                pass
+            if 'title' not in json:
+                sys.exit(1)
+            if 'content' not in json:
+                json['content'] = ""
+            if 'keyword' in json:
+                keyword = json['keyword'].split(',')
+            else:
+                keyword = ''
+            if 'privacy' not in json:
+                json['privacy'] = 0
+            json['keyword'].split(',')
+            id = na.add(title=json['title'], keywords=keyword, content=json['content'], privacy=json['privacy'])
+    sys.exit(0)
 
 if args.title:
     if args.action != "add":
@@ -35,7 +60,6 @@ if args.content:
 else:
     content = ""
 
-na = na(debug=args.debug)
 if args.action == "add":
     if args.title == "" and args.content == "":
         keyword_list = na.sql("SELECT keywordId, keyword FROM keyword;")
