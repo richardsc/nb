@@ -14,10 +14,10 @@ class na:
         self.authorId = authorId
         self.debug = debug 
 
-    def add(self, title, keywords, content):
+    def add(self, title, keywords, content, privacy=0):
         now = datetime.datetime.now()
         date = now.strftime("%Y-%m-%d %H:%M:%S")
-        cmd = "INSERT INTO note(authorId, date, title, content) VALUES(%d, '%s', '%s', '%s')" % (self.authorId, date, title, content)
+        cmd = "INSERT INTO note(authorId, date, title, content, privacy) VALUES(%d, '%s', '%s', '%s', '%s')" % (self.authorId, date, title, content, privacy)
         if self.debug:
             print cmd
         self.cur.execute(cmd)
@@ -77,10 +77,10 @@ class na:
                 print cmd
             self.cur.execute(cmd)
             res = self.cur.fetchone()
-            if res[4]:
+            if int(res[4]) > 0:
                 privacy = "(Private)"
             else:
-                privacy = ""
+                privacy = "(Public)"
             print "<%s %s> %s %s\n  %s" % (res[0], res[1], res[2], privacy, res[3])
             # Next bit should be done with a join, I think
             cmd = "SELECT keywordid FROM notekeyword WHERE notekeyword.noteid = %d" % n

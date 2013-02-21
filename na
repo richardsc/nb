@@ -14,6 +14,7 @@ parser.add_argument("--title", type=str, help="title (short)")
 parser.add_argument("--keyword", type=str, help="comma-separated keywords")
 parser.add_argument("--content", type=str, help="content (long; markdown format)")
 parser.add_argument("--debug", action="store_true", dest="debug", default=False, help="set debugging on")
+parser.add_argument("--privacy", type=int, default=0, help="set privacy level (0=open, 1=closed)")
 args = parser.parse_args()
 
 if args.keyword:
@@ -36,7 +37,7 @@ else:
 
 na = na(debug=args.debug)
 if args.action == "add":
-    id = na.add(title, keywords, content)
+    id = na.add(title, keywords, content, args.privacy)
     print "id:", id
 
 if args.action == "find":
