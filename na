@@ -1,8 +1,10 @@
 #!/usr/bin/python
 
 '''
-./na --action add --title "oceanpython lecture" --keyword "lecture,python" --content "Diego gave a great talk"
-./na --action find --keyword "lecture"
+./na add --title "oceanpython lecture" --keyword "lecture,python" --content "Diego gave a great talk"
+./na find --keyword "lecture"
+./na find # shows all
+./na add  # prompts for info
 '''
 
 from naclass import na
@@ -35,9 +37,25 @@ else:
 
 na = na(debug=args.debug)
 if args.action == "add":
-    id = na.add(title=args.title, keywords=args.keywords, content=args.content, privacy=args.privacy)
-    print "id:", id
+    if args.title == "" and args.content == "":
+        keyword_list = na.sql("SELECT keywordId, keyword FROM keyword;")
+        msg = "Keywords (e.g. one of following) "
+        for key in keyword_list:
+            msg = msg + key[1] + ","
+        msg = msg + "... : "
+        keywords = raw_input(msg).split(',')
+        title = raw_input("Title: ")
+        content = raw_input("Content: ")
+        privacy = raw_input("Privacy (numeric): ")
+        privacy = int(privacy)
+        id = na.add(title=title, keywords=keywords, content=content, privacy=privacy)
+    else:
+        id = na.add(title=args.title, keywords=args.keywords, content=args.content, privacy=args.privacy)
 
 if args.action == "find":
-    na.find(keywords=args.keywords)
+    if args.keywords[0] != '':
+        na.find(keywords=args.keywords)
+    else:
+        na.find(keywords='?'.split(','))
+
 
