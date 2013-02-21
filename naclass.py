@@ -48,27 +48,31 @@ class na:
     def find(self, keywords):
         noteIds = []
         if keywords[0] == "?":
-            print "should dump whole database now (with a JOIN to get keywords)"
-            return
-        for keyword in keywords:
-            if self.debug:
-                print "keyword:", keyword, "..."
-            cmd = "SELECT keywordId FROM keyword WHERE keyword='%s';" % keyword
+            cmd = "SELECT noteId FROM note;"
             if self.debug:
                 print cmd
             self.cur.execute(cmd)
-            keywordId = self.cur.fetchone()
-            if keywordId:
-                keywordId = keywordId[0]
-                cmd = "SELECT noteId FROM notekeyword where keywordId=%d;" % keywordId
+            noteIds = self.cur.fetchall()
+        else:
+            for keyword in keywords:
+                if self.debug:
+                    print "keyword:", keyword, "..."
+                cmd = "SELECT keywordId FROM keyword WHERE keyword='%s';" % keyword
                 if self.debug:
                     print cmd
                 self.cur.execute(cmd)
-                for noteId in self.cur.fetchall():
+                keywordId = self.cur.fetchone()
+                if keywordId:
+                    keywordId = keywordId[0]
+                    cmd = "SELECT noteId FROM notekeyword where keywordId=%d;" % keywordId
                     if self.debug:
-                        print '   ', noteId
-                    if noteId not in noteIds:
-                        noteIds.append(noteId)
+                        print cmd
+                    self.cur.execute(cmd)
+                    for noteId in self.cur.fetchall():
+                        if self.debug:
+                            print '   ', noteId
+                        if noteId not in noteIds:
+                            noteIds.append(noteId)
             if self.debug:
                 print "noteIds:", noteIds, "\n"
         for n in noteIds:
