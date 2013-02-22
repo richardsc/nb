@@ -49,14 +49,17 @@ class na:
             for keyword in keywords:
                 if self.debug:
                     print "keyword:", keyword, "..."
-                keywordId = self.sql("SELECT keywordId FROM keyword WHERE keyword='%s';" % keyword)[0]
-                if keywordId:
-                    keywordId = keywordId[0]
-                    for noteId in self.sql("SELECT noteId FROM notekeyword WHERE keywordId=%d;" % keywordId):
-                        if self.debug:
-                            print '   ', noteId
-                        if noteId not in noteIds:
-                            noteIds.append(noteId)
+                try:
+                    keywordId = self.sql("SELECT keywordId FROM keyword WHERE keyword='%s';" % keyword)[0]
+                    if keywordId:
+                        keywordId = keywordId[0]
+                        for noteId in self.sql("SELECT noteId FROM notekeyword WHERE keywordId=%d;" % keywordId):
+                            if self.debug:
+                                print '   ', noteId
+                            if noteId not in noteIds:
+                                noteIds.append(noteId)
+                except:
+                    pass
             if self.debug:
                 print "noteIds:", noteIds, "\n"
         for n in noteIds:
