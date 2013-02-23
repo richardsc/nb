@@ -4,10 +4,10 @@
 There are several ways to use na.
 
 ./na add --title "oceanpython lecture" --keyword "lecture,python" --content "Diego gave a great talk"
-./na add                        # interact with user to get the note information
-./na add --json notes.json      # infer notes from a JSON file (ignore any other arguments)
-./na find                       # show all notes
-./na find --keyword "lecture"   # show notes with keyword 'lecture'
+./na add                             # interact with user to get the note information
+./na add --format json < notes.json  # infer notes from a JSON file (ignore any other arguments)
+./na find                            # show all notes
+./na find --keyword "lecture"        # show notes with keyword 'lecture'
 '''
 
 from naclass import Na
@@ -17,17 +17,23 @@ import json
 
 parser = argparse.ArgumentParser()
 parser.add_argument('action', choices=['add', 'find', 'reset'])
-parser.add_argument('--json', type=str, help="file containing JSON-formatted 'title', 'content' and 'keyword'")
+parser.add_argument('--format', type=str, choices=['plain', 'json'], help="file containing JSON-formatted 'title', 'content' and 'keyword'")
 parser.add_argument("--title", type=str, default="", help="title (short)")
 parser.add_argument("--keywords", type=str, default="", help="comma-separated keywords")
 parser.add_argument("--content", type=str, default="", help="content (long; markdown format)")
 parser.add_argument("--debug", action="store_true", dest="debug", default=False, help="set debugging on")
 parser.add_argument("--privacy", type=int, default=0, help="set privacy level (0=open, 1=closed)")
+parser.add_argument("--file", type=str, help="filename for input (add) or output (find)")
 args = parser.parse_args()
 
 args.keywords = args.keywords.split(',')
 
 na = Na(debug=args.debug)
+
+if args.file:
+    file = args.file
+else:
+    file = "stdout"
 
 if args.title:
     if args.action != "add":
@@ -42,9 +48,17 @@ if args.content:
 else:
     content = ""
 
+if args.format:
+    format = args.format
+else:
+    format = 'plain'
+
 if args.action == "add":
-    if args.json:
-        for line in open(args.json, "r"):
+    if format == 'json':
+        if not args.file:
+            print "Must use --file to name an input file"
+            sys.exit(1)
+        for line in open(args.file, "r"):
             line = line.rstrip()
             if (len(line)) > 1:
                 try:
@@ -90,9 +104,9 @@ if args.action == "add":
 
 if args.action == "find":
     if args.keywords[0] != '':
-        na.find(keywords=args.keywords, json=args.json)
+        na.find(keywords=args.keywords, format=format)
     else:
-        na.find(keywords='?'.split(','), json=args.json)
+        na.find(keywords='?'.split(','), format=format)
 
 if args.action == "reset":
     na.initialize(author="me")

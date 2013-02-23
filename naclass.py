@@ -58,8 +58,9 @@ class Na:
         self.con.commit()
         return(noteId)
    
-    def find(self, keywords="", json=False):
-        '''Search notes for a given keyword, printing the results.'''
+    def find(self, keywords="", format="plain"):
+        '''Search notes for a given keyword, printing the results in either
+        'text' or 'json' format.'''
         noteIds = []
         if keywords[0] == "?":
             noteIds.extend(self.con.execute("SELECT noteId FROM note;"))
@@ -91,7 +92,7 @@ class Na:
             keywords = []
             for k in keywordIds:
                 keywords.append(self.cur.execute("SELECT keyword FROM keyword WHERE keywordId = ?;", k).fetchone()[0])
-            if json:
+            if format == 'json':
                 print '{"date":"%s", "title":"%s", "content":"%s","privacy":"%s","keywords":"' % (res[1], res[2], res[3], res[4]),
                 print ','.join(keywords[i] for i in range(len(keywords))), '"}'
             else:
