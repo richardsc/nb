@@ -14,65 +14,61 @@ class na:
         self.authorId = authorId
         self.debug = debug 
 
-    def sql(self, cmd, one=False):
-        if self.debug:
-            print cmd
-        self.cur.execute(cmd)
-        if one:
-            return self.cur.fetchone()
-        else:
-            return self.cur.fetchall()
-
     def add(self, title="", keywords="", content="", privacy=0):
         now = datetime.datetime.now()
         date = now.strftime("%Y-%m-%d %H:%M:%S")
-        self.sql("INSERT INTO note(authorId, date, title, content, privacy) VALUES(%d, '%s', '%s', '%s', '%s')" %
+        self.cur.execute("INSERT INTO note(authorId, date, title, content, privacy) VALUES(?, ?, ?, ?, ?);",
                 (self.authorId, date, title, content, privacy))
         noteId = self.cur.lastrowid
         for keyword in keywords:
-            keywordId = self.sql("SELECT keywordId FROM keyword WHERE keyword='%s';" % keyword, one=True)
+            if self.debug:
+                print " inserting keyword:", keyword
+            keywordId = self.con.execute("SELECT keywordId FROM keyword WHERE keyword = ?;", [keyword]).fetchone()
             if keywordId:
+                if self.debug:
+                    print "(existing keyword with id:", keywordId, ")"
                 keywordId = keywordId[0]
             else:
-                self.sql("INSERT INTO keyword(keyword) VALUES ('%s');" % keyword)
+                if self.debug:
+                    print "(new keyword)"
+                self.con.execute("INSERT INTO keyword(keyword) VALUES (?);", [keyword])
                 keywordId = self.cur.lastrowid
-                # FIXME: should check whether the insertion worked
-            self.sql("INSERT INTO notekeyword(noteId, keywordID) VALUES(%d, %d)" % (noteId, keywordId))
+            self.con.execute("INSERT INTO notekeyword(noteId, keywordID) VALUES(?, ?)", [noteId, keywordId])
         self.con.commit()
         return(noteId)
    
     def find(self, keywords=""):
         noteIds = []
         if keywords[0] == "?":
-            noteIds = self.sql("SELECT noteId from note;")
+            noteIds.extend(self.con.execute("SELECT noteId FROM note;"))
         else:
             for keyword in keywords:
                 if self.debug:
                     print "keyword:", keyword, "..."
+                keywordId = self.cur.execute("SELECT keywordId FROM keyword WHERE keyword = ?;", [keyword])
                 try:
-                    keywordId = self.sql("SELECT keywordId FROM keyword WHERE keyword='%s';" % keyword)[0]
+                    keywordId = self.con.execute("SELECT keywordId FROM keyword WHERE keyword = ?;", [keyword]).fetchone()
                     if keywordId:
-                        keywordId = keywordId[0]
-                        for noteId in self.sql("SELECT noteId FROM notekeyword WHERE keywordId=%d;" % keywordId):
+                        for noteId in self.cur.execute("SELECT noteId FROM notekeyword WHERE keywordId = ?;", keywordId):
                             if self.debug:
-                                print '   ', noteId
+                                print '  noteId:', noteId
                             if noteId not in noteIds:
                                 noteIds.append(noteId)
                 except:
+                    print "problem"
                     pass
-            if self.debug:
-                print "noteIds:", noteIds, "\n"
         for n in noteIds:
-            res = self.sql("SELECT noteId, date, title, content, privacy FROM note WHERE noteId=%s;" % n, one=True)
+            res = self.cur.execute("SELECT noteId, date, title, content, privacy FROM note WHERE noteId=?;", n).fetchone()
             if int(res[4]) > 0:
                 privacy = "(Private)"
             else:
                 privacy = "(Public)"
             print "<%s %s> %s %s\n  %s" % (res[0], res[1], res[2], privacy, res[3])
-            keys = self.sql("SELECT keywordid FROM notekeyword WHERE notekeyword.noteid = %d;" % n)
+            keywordIds = []
+            keywordIds.extend(self.con.execute("SELECT keywordid FROM notekeyword WHERE notekeyword.noteid = ?;", n))
             keywords = []
-            for k in keys:
-                keywords.append(self.sql("SELECT keyword FROM keyword WHERE keywordId = %d;" % k, one=True)[0])
+            for k in keywordIds:
+                keywords.append(self.cur.execute("SELECT keyword FROM keyword WHERE keywordId = ?;", k).fetchone()[0])
             print " ", ", ".join(keywords[i] for i in range(len(keywords))), "\n"
 
  
