@@ -85,12 +85,14 @@ class Na:
                 privacy = "(Private)"
             else:
                 privacy = "(Public)"
-            print "<%s %s> %s %s\n  %s" % (res[0], res[1], res[2], privacy, res[3])
+            #print "<%s %s> %s" % (res[0], res[1], privacy),
             keywordIds = []
             keywordIds.extend(self.con.execute("SELECT keywordid FROM notekeyword WHERE notekeyword.noteid = ?;", n))
             keywords = []
             for k in keywordIds:
                 keywords.append(self.cur.execute("SELECT keyword FROM keyword WHERE keywordId = ?;", k).fetchone()[0])
-            print " ", ", ".join(keywords[i] for i in range(len(keywords))), "\n"
-
- 
+            print "\"%s\"" % res[2],
+            print "[", " ] [ ".join(keywords[i] for i in range(len(keywords))), "]"
+            for contentLine in res[3].split('\n'):
+                print "  ", contentLine
+            print '\n'

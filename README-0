@@ -1,0 +1,5 @@
+>>> import json
+>>> a = {'title':'a title here','content':'content here', 'keywords':'key1,key2','privacy':0}
+>>> a['author']='dan'
+>>> json.dumps(a)
+'{"content": "content here", "keywords": "key1,key2", "privacy": 0, "author": "dan", "title": "a title here"}'

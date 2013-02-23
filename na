@@ -64,16 +64,24 @@ else:
 
 if args.action == "add":
     if args.title == "" and args.content == "":
-        keyword_list = na.sql("SELECT keywordId, keyword FROM keyword;")
+        keyword_list = na.con.execute("SELECT keywordId, keyword FROM keyword;")
         msg = "Keywords (e.g. one of following) "
         for key in keyword_list:
             msg = msg + key[1] + ","
         msg = msg + "... : "
         keywords = raw_input(msg).split(',')
         title = raw_input("Title: ")
-        content = raw_input("Content: ")
         privacy = raw_input("Privacy (numeric): ")
         privacy = int(privacy)
+        print "Content: (blank line to end)"
+        content = ""
+        while True:
+            c = raw_input("> ")
+            if len(c) == 0:
+                break
+            else:
+                content = content + c + '\n'
+        content.rstrip('\n')
         id = na.add(title=title, keywords=keywords, content=content, privacy=privacy)
     else:
         id = na.add(title=args.title, keywords=args.keywords, content=args.content, privacy=args.privacy)
