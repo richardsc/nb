@@ -31,7 +31,7 @@ class na:
             else:
                 if self.debug:
                     print "(new keyword)"
-                self.con.execute("INSERT INTO keyword(keyword) VALUES (?);", [keyword])
+                self.cur.execute("INSERT INTO keyword(keyword) VALUES (?);", [keyword])
                 keywordId = self.cur.lastrowid
             self.con.execute("INSERT INTO notekeyword(noteId, keywordID) VALUES(?, ?)", [noteId, keywordId])
         self.con.commit()
