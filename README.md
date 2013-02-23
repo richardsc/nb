@@ -106,6 +106,6 @@ Advanced users may want to dump the whole database with
 It is a good idea to set up a crontab entry like the following, to back up the
 database daily (adjust the filenames appropriately).
 
-    @daily echo ".dump" | sqlite3 /Users/kelley/na.db | gzip -c > /Users/kelley/backup/sqlite3/na/na-`date +\%Y-\%m-\%d-\%H\%M`.gz
+    @daily echo ".dump" | sqlite3 /Users/kelley/na.db | gzip -c > /Users/kelley/backup/na/na-`date +\%Y-\%m-\%d-\%H\%M`.gz
 
 

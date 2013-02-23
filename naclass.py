@@ -2,9 +2,11 @@
 import sys
 import sqlite3 as sqlite
 import datetime
+import os.path
+import json
 
 class Na:
-    def __init__(self, dbname="na.db", authorId=1, debug=0):
+    def __init__(self, db="na.db", authorId=1, debug=0):
         '''
 
         A class used for the storing and searching of textual notes in a
@@ -12,7 +14,13 @@ class Na:
         convenient way to search later.
 
         '''
-        con = sqlite.connect(dbname)
+        db = os.path.expanduser(db)
+        if debug:
+            print "db: '%s' (after path expansion)" % db
+        mustInitialize = not os.path.exists(db)
+        if debug:
+            print 'mustInitialize:', mustInitialize
+        con = sqlite.connect(db)
         if not con:
             print "error opening connection"
             sys.exit(1)
@@ -20,6 +28,8 @@ class Na:
         self.cur = con.cursor()
         self.authorId = authorId
         self.debug = debug 
+        if mustInitialize:
+            self.initialize()
 
     def initialize(self, author=""):
         ''' Initialize the database.  This is dangerous since it removes any
@@ -82,10 +92,7 @@ class Na:
                     pass
         for n in noteIds:
             res = self.cur.execute("SELECT noteId, authorId, date, title, content, privacy FROM note WHERE noteId=?;", n).fetchone()
-            if int(res[5]) > 0:
-                privacy = "(Private)"
-            else:
-                privacy = "(Public)"
+            privacy = res[5]
             #print "<%s %s> %s" % (res[0], res[1], privacy),
             keywordIds = []
             keywordIds.extend(self.con.execute("SELECT keywordid FROM notekeyword WHERE notekeyword.noteid = ?;", n))
@@ -93,11 +100,22 @@ class Na:
             for k in keywordIds:
                 keywords.append(self.cur.execute("SELECT keyword FROM keyword WHERE keywordId = ?;", k).fetchone()[0])
             if format == 'json':
-                print '{"authorId":"%s","date":"%s","title":"%s","content":"%s","privacy":"%s","keywords":"' % (res[1], res[2], res[3], privacy, res[4]),
-                print ','.join(keywords[i] for i in range(len(keywords))), '"}'
+                # >>> json.loads('{"c":"ab \\n \' \\" c"}')
+                # {u'c': u'ab \n \' " c'}
+                content = res[4]
+                content = res[4].replace('\n', '\\n')
+                ##content = content.replace('"', '\\"')
+                ##content = content.replace("'", "\'")
+                #print '{"authorId":"%s","date":"%s","title":"%s","content":"%s","privacy":"%s","keywords":"' % (res[1], res[2], res[3], content, privacy),
+                #print ','.join(keywords[i] for i in range(len(keywords))), '"}'
+                keywordsStr = ','.join(keywords[i] for i in range(len(keywords)))
+                c = {"authorId":res[1], "date":res[2],"title":res[3],"content":content,"privacy":privacy}
+                c["keywords"] = keywordsStr
+                print json.dumps(c)
             else:
                 print "\"%s\"" % res[3],
                 print "[", " ] [ ".join(keywords[i] for i in range(len(keywords))), "]"
-                for contentLine in res[4].split('\n'):
+                content = res[4].replace('\\n', '\n')
+                for contentLine in content.split('\n'):
                     print "  ", contentLine
                 print '\n'

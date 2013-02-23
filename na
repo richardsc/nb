@@ -14,6 +14,7 @@ from naclass import Na
 import argparse
 import sys
 import json
+import os
 
 parser = argparse.ArgumentParser()
 parser.add_argument('action', choices=['add', 'find', 'reset'])
@@ -24,11 +25,12 @@ parser.add_argument("--content", type=str, default="", help="content (long; mark
 parser.add_argument("--debug", action="store_true", dest="debug", default=False, help="set debugging on")
 parser.add_argument("--privacy", type=int, default=0, help="set privacy level (0=open, 1=closed)")
 parser.add_argument("--file", type=str, help="filename for input (add) or output (find)")
+parser.add_argument("--db", type=str, default="~/Dropbox/na.db", help="filename for database")
 args = parser.parse_args()
 
 args.keywords = args.keywords.split(',')
 
-na = Na(debug=args.debug)
+na = Na(debug=args.debug, db=args.db)
 
 if args.file:
     file = args.file
@@ -60,9 +62,13 @@ if args.action == "add":
             sys.exit(1)
         for line in open(args.file, "r"):
             line = line.rstrip()
+            if args.debug:
+                print line, '\n'
             if (len(line)) > 1:
                 try:
                     j = json.loads(line)
+                    if args.debug:
+                        print j
                 except:
                     print "JSON file is not in proper format on line: %s" % line
                     sys.exit(1)
