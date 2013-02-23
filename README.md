@@ -95,11 +95,17 @@ Notes may be exported to a JSON file by e.g.
 
     ./na find --format json > notes.json
 
-#### Dump database (advance)
+#### Dump database
 
-Advanced users probably do not need to be told this, but the whole database may
-be dumped with
+Advanced users may want to dump the whole database with
 
     echo ".dump" | sqlite3 na.db
+
+#### Back up the database
+
+It is a good idea to set up a crontab entry like the following, to back up the
+database daily (adjust the filenames appropriately).
+
+    @daily echo ".dump" | sqlite3 /Users/kelley/na.db | gzip -c > /Users/kelley/backup/sqlite3/na/na-`date +\%Y-\%m-\%d-\%H\%M`.gz
 
 
