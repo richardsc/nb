@@ -75,8 +75,9 @@ or via prompted interaction,
 
     ./na add
 
-One or more notes can also be added through input of a JSON file (see
-``note.json``) in this directory).
+One or more notes can also be added through input of a JSON file, e.g.
+
+    ./na add --format json --file note.json
 
 #### Find notes
 
