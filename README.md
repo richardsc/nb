@@ -84,6 +84,10 @@ At present, the only way to find notes is by searching for a keyword, e.g.
 
     ./na find --keyword "lecture"
 
+To get all the notes, use
+
+    ./na find
+
 #### Export notes
 
 Notes may be exported to a JSON file by e.g.
