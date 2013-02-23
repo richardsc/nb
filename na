@@ -7,13 +7,13 @@
 ./na add  # prompts for info
 '''
 
-from naclass import na
+from naclass import Na
 import argparse
 import sys
 import json
 
 parser = argparse.ArgumentParser()
-parser.add_argument('action', choices=['add', 'find'])
+parser.add_argument('action', choices=['add', 'find', 'reset'])
 parser.add_argument('--json', type=str, help="file containing JSON-formatted 'title', 'content' and 'keyword'")
 parser.add_argument("--title", type=str, default="", help="title (short)")
 parser.add_argument("--keywords", type=str, default="", help="comma-separated keywords")
@@ -24,7 +24,7 @@ args = parser.parse_args()
 
 args.keywords = args.keywords.split(',')
 
-na = na(debug=args.debug)
+na = Na(debug=args.debug)
 
 if args.json:
     for line in open(args.json, "r"):
@@ -83,5 +83,9 @@ if args.action == "find":
         na.find(keywords=args.keywords)
     else:
         na.find(keywords='?'.split(','))
+
+if args.action == "reset":
+    na.initialize(author="me")
+
 
 

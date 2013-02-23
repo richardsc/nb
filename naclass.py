@@ -3,9 +3,16 @@ import sys
 import sqlite3 as sqlite
 import datetime
 
-class na:
-    def __init__(self, filename="na.db", authorId=1, debug=0):
-        con = sqlite.connect(filename)
+class Na:
+    def __init__(self, dbname="na.db", authorId=1, debug=0):
+        '''
+
+        A class used for the storing and searching of textual notes in a
+        sqlite3 database.  Keywords may be attached to notes, providing a
+        convenient way to search later.
+
+        '''
+        con = sqlite.connect(dbname)
         if not con:
             print "error opening connection"
             sys.exit(1)
@@ -14,7 +21,21 @@ class na:
         self.authorId = authorId
         self.debug = debug 
 
+    def initialize(self, author=""):
+        ''' Initialize the database.  This is dangerous since it removes any
+        existing content.'''
+        self.cur.execute("CREATE TABLE note(noteId integer primary key autoincrement, authorId, date, title, content, privacy DEFAULT 0, views DEFAULT 0);")
+        self.cur.execute("CREATE TABLE author(authorId integer primary key autoincrement, name, nickname);")
+        self.cur.execute("CREATE TABLE alias(aliasId integer primary key autoincrement, item, alias);")
+        self.cur.execute("CREATE TABLE keyword(keywordId integer primary key autoincrement, keyword);")
+        self.cur.execute("CREATE TABLE notekeyword(notekeywordId integer primary key autoincrement, noteid, keywordid);")
+
     def add(self, title="", keywords="", content="", privacy=0):
+        ''' Add a note to the database.  The title should be short (perhaps 3
+        to 7 words).  The keywords are comma-separated, and should be similar
+        in style to others in the database.  The content may be of any length.
+        Notes with privacy > 0 are increasingly hidden (or will be, when the
+        application is more complete). '''
         now = datetime.datetime.now()
         date = now.strftime("%Y-%m-%d %H:%M:%S")
         self.cur.execute("INSERT INTO note(authorId, date, title, content, privacy) VALUES(?, ?, ?, ?, ?);",
@@ -38,6 +59,7 @@ class na:
         return(noteId)
    
     def find(self, keywords=""):
+        '''Search notes for a given keyword, printing the results.'''
         noteIds = []
         if keywords[0] == "?":
             noteIds.extend(self.con.execute("SELECT noteId FROM note;"))
