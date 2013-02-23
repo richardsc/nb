@@ -92,7 +92,7 @@ class Na:
             for k in keywordIds:
                 keywords.append(self.cur.execute("SELECT keyword FROM keyword WHERE keywordId = ?;", k).fetchone()[0])
             if json:
-                print '{"date":"%s", "title":"%s", "content":"%s","privacy":"%d","keywords":"' % (res[1], res[2], res[3], res[4]),
+                print '{"date":"%s", "title":"%s", "content":"%s","privacy":"%s","keywords":"' % (res[1], res[2], res[3], res[4]),
                 print ','.join(keywords[i] for i in range(len(keywords))), '"}'
             else:
                 print "\"%s\"" % res[2],
