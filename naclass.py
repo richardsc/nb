@@ -81,8 +81,8 @@ class Na:
                     print "problem"
                     pass
         for n in noteIds:
-            res = self.cur.execute("SELECT noteId, date, title, content, privacy FROM note WHERE noteId=?;", n).fetchone()
-            if int(res[4]) > 0:
+            res = self.cur.execute("SELECT noteId, authorId, date, title, content, privacy FROM note WHERE noteId=?;", n).fetchone()
+            if int(res[5]) > 0:
                 privacy = "(Private)"
             else:
                 privacy = "(Public)"
@@ -93,11 +93,11 @@ class Na:
             for k in keywordIds:
                 keywords.append(self.cur.execute("SELECT keyword FROM keyword WHERE keywordId = ?;", k).fetchone()[0])
             if format == 'json':
-                print '{"date":"%s", "title":"%s", "content":"%s","privacy":"%s","keywords":"' % (res[1], res[2], res[3], res[4]),
+                print '{"authorId":"%s","date":"%s","title":"%s","content":"%s","privacy":"%s","keywords":"' % (res[1], res[2], res[3], privacy, res[4]),
                 print ','.join(keywords[i] for i in range(len(keywords))), '"}'
             else:
-                print "\"%s\"" % res[2],
+                print "\"%s\"" % res[3],
                 print "[", " ] [ ".join(keywords[i] for i in range(len(keywords))), "]"
-                for contentLine in res[3].split('\n'):
+                for contentLine in res[4].split('\n'):
                     print "  ", contentLine
                 print '\n'
