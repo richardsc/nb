@@ -2,58 +2,99 @@
 
 ## Overview
 
-Most of us take notes on lots of things through the day, and would like a way
-to store them for a long time, and access them easily hours or years later, by
-searching content, looking in date ranges, sifting through keywords, etc.  Once
-there are more than a few notes, it will become important to be able to edit
-them, comment upon them, make links between them, etc.  Notes should be
-accessible from a variety of devices, which calls for a cloud-like storage
-mechanism.
+It is easy to record brief notes for use in the short term, e.g. by writing a
+line in a file named "README".  Others might call the file "notes" or,
+depending on the content, "plans" or "ideas", "problems", etc.  As notes
+accumulate, however, it can grow increasingly difficult to decide in which file
+to put a new note.  Does an idea for fixing a problem belong in "ideas" or
+"problems"?  One solution to this is to use a single file that merges notes of
+a variety of types, with a categorization scheme to organize the material.
+That scheme might involve titles and keywords that the author has associated
+with notes, the time of note creation, etc.
 
+For small tasks, a simple text file can work quite well, but this approach
+grows cumbersome as notes accumulate, both for adding notes and for finding
+them.  Using a general-purpose editor is risky because the process of adding a
+new note can result in the destruction of existing notes.  Sifting through
+notes with a general editor is also problematic, unless strict formatting
+procedures are followed.
 
-## Features
+Using a database to store notes solves these problems.  Databases are ideal for
+binding notes together with keywords, etc., and the isolation they provide
+between the data and the user is helpful in preventing accidental deletion of
+notes.
 
-1. ubiquitous
+The ``na`` application is designed with these things in mind.  It provides
+several ways to add notes, and to search through existing notes.  So far, it
+functions entirely at the unix command line, and is most suited for power users
+who are unafraid of that environment.
 
-2. keywords 
+The development model for ``na`` is entirely open-source.  It stores notes in a
+database in the [sqlite](http://www.sqlite.org/) format, and is coded in the
+[python](http://python.org) programming language; both of these are open-source
+products that are freely available on most computing platforms.  The
+open-source nature of ``na`` is important because it saves the problem that
+arises when users grow dependent on a software tool that may cease to work if 
+a company goes out of business.
 
-3. update history (not implemented yet)
+## Timeline
 
-4. text + graphs (graphs not implemented yet)
+### 2013-02
 
-5. interaction from commandline (initially), with a python module that will
-   make for easy extension to emacs/vim interaction, web interaction, and gui
-interaction.
+* Develop a series of trial versions that will be suitable for use by the
+  author in his own work.
 
-6. open-source, meaning zero cost and no worries about company bankrupcy
+* Tell others of the project and invite discussion of features (especially
+  database design).
 
+### 2013-03
+
+* Based on experience in everyday use, firm up the database design.
+
+* Invite other developers to work on editor-based versions.
+
+* Develop a trial web-based version.
 
 
 ### Using na
 
-#### Create database
+#### Create a database
 
-    make
+    ./na reset
 
-(Soon, this will be done with ``./na setup``)
+Important: this will erase an existing database.
 
 
-#### Test database
+#### Add notes
 
-    make test
+This may be done one at a time, with commandline arguments, e.g.
 
-#### Add a note
+    ./na add --keywords 'lecture,physics,MIT' --title="Walter Lewin physics lectures" --content="http://ocw.mit.edu/courses/physics/8-01-physics-i-classical-mechanics-fall-1999/index.htm"
 
-    ./na add --title "oceanpython lecture" --keyword "lecture,python,diego" --content "Diego now speaks twice per week"
+or via prompted interaction,
 
-#### Find a note by keyword
+    ./na add
+
+One or more notes can also be added through input of a JSON file (see
+``note.json``) in this directory).
+
+#### Find notes
+
+At present, the only way to find notes is by searching for a keyword, e.g.
 
     ./na find --keyword "lecture"
 
-#### Dump database
+#### Export notes
 
-    ./na find
+Notes may be exported to a JSON file by e.g.
+
+    ./na find --format json > notes.json
+
+#### Dump database (advance)
+
+Advanced users probably do not need to be told this, but the whole database may
+be dumped with
+
     echo ".dump" | sqlite3 na.db
-
 
 
