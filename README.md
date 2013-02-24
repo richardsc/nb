@@ -58,9 +58,16 @@ a company goes out of business.
 
 ### Using na
 
+### Installation
+
+Download the source code to some directory, and then create an alias along the
+following lines, adjusted for the directory name
+
+    alias na=/Users/kelley/src/na/na
+
 #### Create a database
 
-    ./na reset
+    ./na RESET
 
 Important: this will erase an existing database.
 
@@ -106,6 +113,8 @@ Advanced users may want to dump the whole database with
 It is a good idea to set up a crontab entry like the following, to back up the
 database daily (adjust the filenames appropriately).
 
-    @daily echo ".dump" | sqlite3 /Users/kelley/na.db | gzip -c > /Users/kelley/backup/na/na-`date +\%Y-\%m-\%d-\%H\%M`.gz
+    @daily echo ".dump" | sqlite3 /Users/kelley/Dropbox/na.db | gzip -c > /Users/kelley/backup/na/na-`date +\%Y-\%m-\%d-\%H\%M`.gz
 
+(This could be done better by checking the sha value of the file, to only
+backup when things have changed.)
 

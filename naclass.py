@@ -16,10 +16,10 @@ class Na:
         '''
         db = os.path.expanduser(db)
         if debug:
-            print "db: '%s' (after path expansion)" % db
+            print "Working with database named '%s' (after path expansion)." % db
         mustInitialize = not os.path.exists(db)
-        if debug:
-            print 'mustInitialize:', mustInitialize
+        if debug and mustInitialize:
+            print 'This database did not exist, so it was created'
         con = sqlite.connect(db)
         if not con:
             print "error opening connection"
@@ -66,8 +66,45 @@ class Na:
                 keywordId = self.cur.lastrowid
             self.con.execute("INSERT INTO notekeyword(noteId, keywordID) VALUES(?, ?)", [noteId, keywordId])
         self.con.commit()
-        return(noteId)
-   
+        return noteId
+
+    def delete(self, id=-1):
+        if id < 0:
+            print "cannot delete a note with a negative id number (%s)" % id
+            return False
+        if self.debug:
+            n = self.cur.execute("SELECT noteId, title FROM note WHERE noteId = ?;", [id])
+            print "Deleting the following note:", n.fetchone()
+        try:
+            self.cur.execute("DELETE FROM note WHERE noteId = ?;", [id])
+        except:
+            print "there is no note numbered %d" % id
+            return False
+        try:
+            self.cur.execute("DELETE FROM notekeyword WHERE noteId = ?;", [id])
+        except:
+            print "there was a problem deleting keywords associated with note numbered %d" % id
+        self.cleanup()
+        self.con.commit()
+        return True
+
+    def cleanup(self):
+        ''' Clean up the database, e.g. removing unused keywords.'''
+        allList = []
+        allList.extend(self.cur.execute("SELECT keywordid FROM keyword;"))
+        usedList = []
+        usedList.extend(self.cur.execute("SELECT keywordid FROM notekeyword;"))
+        unusedList = [val for val in allList if val not in usedList]
+        for key in unusedList:
+            if self.debug:
+                print "About to delete keyword with ID %s" % key
+            try:
+                self.cur.execute("DELETE FROM keyword WHERE keywordId = ?;", key)
+            except:
+                print "There was a problem deleting keyword %s" % key
+        self.con.commit()
+
+
     def find(self, keywords="", format="plain"):
         '''Search notes for a given keyword, printing the results in either
         'text' or 'json' format.'''
@@ -91,9 +128,9 @@ class Na:
                     print "problem"
                     pass
         for n in noteIds:
-            res = self.cur.execute("SELECT noteId, authorId, date, title, content, privacy FROM note WHERE noteId=?;", n).fetchone()
-            privacy = res[5]
-            #print "<%s %s> %s" % (res[0], res[1], privacy),
+            note = self.cur.execute("SELECT noteId, authorId, date, title, content, privacy FROM note WHERE noteId=?;", n).fetchone()
+            privacy = note[5]
+            #print "<%s %s> %s" % (note[0], note[1], privacy),
             keywordIds = []
             keywordIds.extend(self.con.execute("SELECT keywordid FROM notekeyword WHERE notekeyword.noteid = ?;", n))
             keywords = []
@@ -102,20 +139,19 @@ class Na:
             if format == 'json':
                 # >>> json.loads('{"c":"ab \\n \' \\" c"}')
                 # {u'c': u'ab \n \' " c'}
-                content = res[4]
-                content = res[4].replace('\n', '\\n')
+                content = note[4].replace('\n', '\\n')
                 ##content = content.replace('"', '\\"')
                 ##content = content.replace("'", "\'")
-                #print '{"authorId":"%s","date":"%s","title":"%s","content":"%s","privacy":"%s","keywords":"' % (res[1], res[2], res[3], content, privacy),
+                #print '{"authorId":"%s","date":"%s","title":"%s","content":"%s","privacy":"%s","keywords":"' % (note[1], note[2], note[3], content, privacy),
                 #print ','.join(keywords[i] for i in range(len(keywords))), '"}'
                 keywordsStr = ','.join(keywords[i] for i in range(len(keywords)))
-                c = {"authorId":res[1], "date":res[2],"title":res[3],"content":content,"privacy":privacy}
+                c = {"authorId":note[1], "date":note[2],"title":note[3],"content":content,"privacy":privacy}
                 c["keywords"] = keywordsStr
                 print json.dumps(c)
             else:
-                print "\"%s\"" % res[3],
+                print "\"%s\" <%s>" % (note[3], note[0]),
                 print "[", " ] [ ".join(keywords[i] for i in range(len(keywords))), "]"
-                content = res[4].replace('\\n', '\n')
+                content = note[4].replace('\\n', '\n')
                 for contentLine in content.split('\n'):
                     print "  ", contentLine
                 print '\n'
