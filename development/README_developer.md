@@ -2,13 +2,9 @@
 
 ## db columns
 
-* what is the point of 'views' in 'note'?
+* should use (or delete) the 'author' table
 
-* what is the point of the 'author' table?
-
-* maybe 'note' should have an item for priority
-
-* maybe 'note' should have timing items e.g. 'doBefore' or 'status', for planning
+* should 'note' have a column for priority or timing or status?
 
 ## json i/o tests
 

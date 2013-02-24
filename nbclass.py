@@ -37,7 +37,7 @@ class Nb:
     def initialize(self, author=""):
         ''' Initialize the database.  This is dangerous since it removes any
         existing content.'''
-        self.cur.execute("CREATE TABLE note(noteId integer primary key autoincrement, authorId, date, title, content, privacy DEFAULT 0, views DEFAULT 0);")
+        self.cur.execute("CREATE TABLE note(noteId integer primary key autoincrement, authorId, date, title, content, privacy DEFAULT 0);")
         self.cur.execute("CREATE TABLE author(authorId integer primary key autoincrement, name, nickname);")
         self.cur.execute("CREATE TABLE alias(aliasId integer primary key autoincrement, item, alias);")
         self.cur.execute("CREATE TABLE keyword(keywordId integer primary key autoincrement, keyword);")
