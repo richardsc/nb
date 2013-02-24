@@ -136,7 +136,8 @@ if args.action == "find":
             print "[", " ] [ ".join(f['keywords'][i] for i in range(len(f['keywords']))), "]"
             content = f['content'].replace('\\n', '\n')
             for contentLine in content.split('\n'):
-                print "  ", contentLine
+                print "  ", contentLine.rstrip('\n')
+            print ''
  
 
 if args.action == "delete":
