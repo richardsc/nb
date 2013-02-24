@@ -24,10 +24,11 @@ binding notes together with keywords, etc., and the isolation they provide
 between the data and the user is helpful in preventing accidental deletion of
 notes.
 
-The ``nb`` application is designed with these things in mind.  It provides
-several ways to add notes, and to search through existing notes.  So far, it
-functions entirely at the unix command line, and is most suited for power users
-who are unafraid of that environment.
+The ``nb`` application (named for the Latin phrase "nota bene") is designed
+with these things in mind.  It provides several ways to add notes, and to
+search through existing notes.  So far, it functions entirely at the unix
+command line, and is most suited for power users who are unafraid of that
+environment.
 
 The development model for ``nb`` is entirely open-source.  It stores notes in a
 database in the [sqlite](http://www.sqlite.org/) format, and is coded in the
