@@ -59,14 +59,14 @@ a company goes out of business.
 
 ### Using nb
 
-### Installation
+#### Installation
 
 Download the source code to some directory, and then create an alias along the
 following lines, adjusted for the directory name
 
     alias nb=/Users/kelley/src/nb/nb
 
-### Specifying a database file
+#### Specifying a database file
 
 The default database file is ``~/Dropbox/nb.db``, but this may not suit all
 users, so there are two ways to specify a different file.  The first way is to
@@ -76,14 +76,14 @@ for example it might contain the following.
 
     db = "~/Dropbox/nb.db"
 
-### Create a database
+#### Create a database
 
     ./nb RESET
 
 Important: this will erase an existing database.
 
 
-#### Add notes
+##### Add notes
 
 This may be done one at a time, with commandline arguments, e.g.
 
