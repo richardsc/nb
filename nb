@@ -131,7 +131,8 @@ if args.action == "find":
         if format == "json":
             print f['json']
         else:
-            print "%s <%s>" % (f['title'], f['noteId']),
+            #print "%s   <%s>" % (f['title'], f['noteId']),
+            print "%s\n   <%s>" % (f['title'], f['noteId']),
             print "[", " ] [ ".join(f['keywords'][i] for i in range(len(f['keywords']))), "]"
             content = f['content'].replace('\\n', '\n')
             for contentLine in content.split('\n'):
