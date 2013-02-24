@@ -16,6 +16,19 @@ import sys
 import json
 import os
 
+# look in ~/.narc to see if a database is named there
+defaultDatabase = "~/Dropbox/na.py"
+try:
+    with open(os.path.expanduser("~/.narc"), "r") as f:
+        tokens = f.readline().split("=")
+        tokens[0] = tokens[0].strip()
+        tokens[1] = tokens[1].strip()
+        tokens[1] = tokens[1].strip('"')
+        if tokens[0] == "db":
+            defaultDatabase = tokens[1] # over-ride
+except:
+    pass
+
 parser = argparse.ArgumentParser()
 parser.add_argument('action', choices=['add', 'find', 'delete', 'RESET', 'cleanup'])
 parser.add_argument('--id', type=int, help="ID number of note to delete")
@@ -26,7 +39,7 @@ parser.add_argument("--content", type=str, default="", help="content (long; mark
 parser.add_argument("--debug", action="store_true", dest="debug", default=False, help="set debugging on")
 parser.add_argument("--privacy", type=int, default=0, help="set privacy level (0=open, 1=closed)")
 parser.add_argument("--file", type=str, help="filename for input (add) or output (find)")
-parser.add_argument("--db", type=str, default="~/Dropbox/na.db", help="filename for database")
+parser.add_argument("--db", type=str, default=defaultDatabase, help="filename for database")
 args = parser.parse_args()
 
 args.keywords = args.keywords.split(',')

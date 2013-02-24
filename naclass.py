@@ -14,15 +14,18 @@ class Na:
         convenient way to search later.
 
         '''
+        if debug:
+            print "Working with database named '%s' (before path expansion)." % db
         db = os.path.expanduser(db)
         if debug:
             print "Working with database named '%s' (after path expansion)." % db
         mustInitialize = not os.path.exists(db)
-        if debug and mustInitialize:
-            print 'This database did not exist, so it was created'
-        con = sqlite.connect(db)
-        if not con:
-            print "error opening connection"
+        if mustInitialize:
+            print "Warning: there is no database named '%s', so one is being created" % db
+        try:
+            con = sqlite.connect(db)
+        except:
+            print "Error opening connection to database named '%s'" % db
             sys.exit(1)
         self.con = con
         self.cur = con.cursor()

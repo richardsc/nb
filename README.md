@@ -65,7 +65,17 @@ following lines, adjusted for the directory name
 
     alias na=/Users/kelley/src/na/na
 
-#### Create a database
+### Specifying a database file
+
+The default database file is ``~/Dropbox/na.db``, but this may not suit all
+users, so there are two ways to specify a different file.  The first way is to
+supply the filename as an argument, e.g. ``na find --db ~/na.db``.  The second
+way is to name a default database in an initialization file named ``~/.narc``;
+for example it might contain the following.
+
+    db = "~/Dropbox/na.db"
+
+### Create a database
 
     ./na RESET
 
