@@ -1,5 +1,15 @@
 # Developer discussion
 
+## db columns
+
+* what is the point of 'views' in 'note'?
+
+* what is the point of the 'author' table?
+
+* maybe 'note' should have an item for priority
+
+* maybe 'note' should have timing items e.g. 'doBefore' or 'status', for planning
+
 ## json i/o tests
 
 Having problems with some existing items, using json output then input.
