@@ -31,12 +31,25 @@ class Nb:
         self.cur = con.cursor()
         self.authorId = authorId
         self.debug = debug 
+        self.appversion = [0, 1]
+        self.dbversion = self.appversion
         if mustInitialize:
             self.initialize()
+        try:
+            v = self.cur.execute("SELECT major,minor FROM version;").fetchone()
+            self.dbversion = v
+        except:
+            pass
+
+    def version(self):
+        print "Application version %d.%d; database version %d.%d" % (self.appversion[0], self.appversion[1], self.dbversion[0], self.dbversion[1])
 
     def initialize(self, author=""):
         ''' Initialize the database.  This is dangerous since it removes any
         existing content.'''
+        self.cur.execute("CREATE TABLE version(major, minor);")
+        self.cur.execute("INSERT INTO version(major, minor) VALUES (?,?);",
+                (self.appversion[0], self.appversion[1]))
         self.cur.execute("CREATE TABLE note(noteId integer primary key autoincrement, authorId, date, title, content, privacy DEFAULT 0);")
         self.cur.execute("CREATE TABLE author(authorId integer primary key autoincrement, name, nickname);")
         self.cur.execute("CREATE TABLE alias(aliasId integer primary key autoincrement, item, alias);")

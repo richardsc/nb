@@ -30,7 +30,7 @@ except:
     pass
 
 parser = argparse.ArgumentParser()
-parser.add_argument('action', choices=['add', 'find', 'delete', 'RESET', 'cleanup'])
+parser.add_argument('action', choices=['add', 'find', 'delete', 'version', 'RESET', 'cleanup'])
 parser.add_argument('--id', type=int, help="ID number of note to delete")
 parser.add_argument('--format', type=str, choices=['plain', 'json'], help="file containing JSON-formatted 'title', 'content' and 'keyword'")
 parser.add_argument("--title", type=str, default="", help="title (short)")
@@ -154,4 +154,6 @@ if args.action == "RESET":
 if args.action == "cleanup":
     nb.cleanup()
 
+if args.action == "version":
+    nb.version()
 
