@@ -124,9 +124,19 @@ if args.action == "add":
 
 if args.action == "find":
     if args.keywords[0] != '':
-        nb.find(keywords=args.keywords, format=format)
+        found = nb.find(keywords=args.keywords, format=format)
     else:
-        nb.find(keywords='?'.split(','), format=format)
+        found = nb.find(keywords='?'.split(','), format=format)
+    for f in found:
+        if format == "json":
+            print f['json']
+        else:
+            print "\"%s\" <%s>" % (f['title'], f['noteId']),
+            print "[", " ] [ ".join(f['keywords'][i] for i in range(len(f['keywords']))), "]"
+            content = f['content'].replace('\\n', '\n')
+            for contentLine in content.split('\n'):
+                print "  ", contentLine
+ 
 
 if args.action == "delete":
     if not args.id:

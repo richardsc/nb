@@ -130,31 +130,22 @@ class Nb:
                 except:
                     print "problem"
                     pass
+        rval = []
         for n in noteIds:
             note = self.cur.execute("SELECT noteId, authorId, date, title, content, privacy FROM note WHERE noteId=?;", n).fetchone()
             privacy = note[5]
-            #print "<%s %s> %s" % (note[0], note[1], privacy),
             keywordIds = []
             keywordIds.extend(self.con.execute("SELECT keywordid FROM notekeyword WHERE notekeyword.noteid = ?;", n))
             keywords = []
             for k in keywordIds:
                 keywords.append(self.cur.execute("SELECT keyword FROM keyword WHERE keywordId = ?;", k).fetchone()[0])
             if format == 'json':
-                # >>> json.loads('{"c":"ab \\n \' \\" c"}')
-                # {u'c': u'ab \n \' " c'}
                 content = note[4].replace('\n', '\\n')
-                ##content = content.replace('"', '\\"')
-                ##content = content.replace("'", "\'")
-                #print '{"authorId":"%s","date":"%s","title":"%s","content":"%s","privacy":"%s","keywords":"' % (note[1], note[2], note[3], content, privacy),
-                #print ','.join(keywords[i] for i in range(len(keywords))), '"}'
                 keywordsStr = ','.join(keywords[i] for i in range(len(keywords)))
                 c = {"authorId":note[1], "date":note[2],"title":note[3],"content":content,"privacy":privacy}
                 c["keywords"] = keywordsStr
-                print json.dumps(c)
+                rval.append({"json":json.dumps(c)})
             else:
-                print "\"%s\" <%s>" % (note[3], note[0]),
-                print "[", " ] [ ".join(keywords[i] for i in range(len(keywords))), "]"
-                content = note[4].replace('\\n', '\n')
-                for contentLine in content.split('\n'):
-                    print "  ", contentLine
-                print '\n'
+                rval.append({"noteId":note[0], "title":note[3], "keywords":keywords,
+                    "content":note[4], "privacy":note[5]})
+        return rval
