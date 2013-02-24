@@ -83,7 +83,7 @@ for example it might contain the following.
 Important: this will erase an existing database.
 
 
-##### Add notes
+#### Add notes
 
 This may be done one at a time, with commandline arguments, e.g.
 
