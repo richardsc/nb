@@ -5,8 +5,8 @@ import datetime
 import os.path
 import json
 
-class Na:
-    def __init__(self, db="na.db", authorId=1, debug=0):
+class Nb:
+    def __init__(self, db="nb.db", authorId=1, debug=0):
         '''
 
         A class used for the storing and searching of textual notes in a

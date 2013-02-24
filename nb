@@ -1,7 +1,7 @@
 #!/usr/bin/python
 
 '''
-There are several ways to use na.
+There are several ways to use nb.
 
 ./na add --title "oceanpython lecture" --keyword "lecture,python" --content "Diego gave a great talk"
 ./na add                             # interact with user to get the note information
@@ -10,16 +10,16 @@ There are several ways to use na.
 ./na find --keyword "lecture"        # show notes with keyword 'lecture'
 '''
 
-from naclass import Na
+from nbclass import Nb
 import argparse
 import sys
 import json
 import os
 
-# look in ~/.narc to see if a database is named there
-defaultDatabase = "~/Dropbox/na.py"
+# look in ~/.nbrc to see if a database is named there
+defaultDatabase = "~/Dropbox/nb.py"
 try:
-    with open(os.path.expanduser("~/.narc"), "r") as f:
+    with open(os.path.expanduser("~/.nbrc"), "r") as f:
         tokens = f.readline().split("=")
         tokens[0] = tokens[0].strip()
         tokens[1] = tokens[1].strip()
@@ -44,7 +44,7 @@ args = parser.parse_args()
 
 args.keywords = args.keywords.split(',')
 
-na = Na(debug=args.debug, db=args.db)
+nb = Nb(debug=args.debug, db=args.db)
 
 if args.file:
     file = args.file
@@ -97,10 +97,10 @@ if args.action == "add":
                 if 'privacy' not in j:
                     j['privacy'] = 0
                 j['keywords'].split(',')
-                id = na.add(title=j['title'], keywords=keyword, content=j['content'], privacy=j['privacy'])
+                id = nb.add(title=j['title'], keywords=keyword, content=j['content'], privacy=j['privacy'])
         sys.exit(0)
     if args.title == "" and args.content == "":
-        keyword_list = na.con.execute("SELECT keywordId, keyword FROM keyword;")
+        keyword_list = nb.con.execute("SELECT keywordId, keyword FROM keyword;")
         msg = "Keywords (e.g. one of following) "
         for key in keyword_list:
             msg = msg + key[1] + ","
@@ -118,29 +118,29 @@ if args.action == "add":
             else:
                 content = content + c + '\n'
         content.rstrip('\n')
-        id = na.add(title=title, keywords=keywords, content=content, privacy=privacy)
+        id = nb.add(title=title, keywords=keywords, content=content, privacy=privacy)
     else:
-        id = na.add(title=args.title, keywords=args.keywords, content=args.content, privacy=args.privacy)
+        id = nb.add(title=args.title, keywords=args.keywords, content=args.content, privacy=args.privacy)
 
 if args.action == "find":
     if args.keywords[0] != '':
-        na.find(keywords=args.keywords, format=format)
+        nb.find(keywords=args.keywords, format=format)
     else:
-        na.find(keywords='?'.split(','), format=format)
+        nb.find(keywords='?'.split(','), format=format)
 
 if args.action == "delete":
     if not args.id:
-        print "must give a note ID number (in <>) in the 'na find' view"
+        print "must give a note ID number (in <>) in the 'nb find' view"
         sys.exit(1)
     if args.debug:
         print "note with id number", args.id, "should be deleted now"
-    na.delete(args.id)
+    nb.delete(args.id)
 
 
 if args.action == "RESET":
-    na.initialize(author="me")
+    nb.initialize(author="me")
 
 if args.action == "cleanup":
-    na.cleanup()
+    nb.cleanup()
 
 
