@@ -167,6 +167,8 @@ if args.action == "add":
 if args.action == "find":
     if args.keywords[0] != '':
         found = nb.find(keywords=args.keywords, format=format)
+    elif args.id:
+        found = nb.find(id=args.id, format=format)
     else:
         found = nb.find(keywords='?'.split(','), format=format)
     for f in found:

@@ -110,6 +110,10 @@ To get all the notes, use
 
     ./nb find
 
+To find a note with a given ID, use e.g.
+
+    ./nb find --id 1
+
 ### Export notes
 
 Notes may be exported to a JSON file by e.g.
@@ -118,14 +122,20 @@ Notes may be exported to a JSON file by e.g.
 
 or probably more usefully, in plain format by e.g.
 
-    ./nb find > notes.plain
+    ./nb find --id 1 > note_1.txt
+
+to extract the note with the stated ID, or e.g.
+
+    ./nb find --key arctic > note_arctic.txt
+
+to extract notes with keyword "arctic".
 
 ## Import notes
 
-An individual note (e.g. a chunk of information from the ``notes.plain`` file
+An individual note (e.g. a chunk of information from the ``note_1.txt`` file
 created immediately above) can be imported by e.g.
 
-    ./nb add --format plain < notes.plain
+    ./nb add --format plain < note_1.txt
 
 This, combined with the export mechanism, provides an easy way to email notes
 to colleagues, so they can import them into their own databases.

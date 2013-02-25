@@ -122,28 +122,31 @@ class Nb:
         self.con.commit()
 
 
-    def find(self, keywords="", format="plain"):
-        '''Search notes for a given keyword, printing the results in either
-        'text' or 'json' format.'''
+    def find(self, id=None, keywords="", format="plain"):
+        '''Search notes for a given id or keyword, printing the results in
+        either 'plain' or 'JSON' format.'''
         noteIds = []
-        if keywords[0] == "?":
-            noteIds.extend(self.con.execute("SELECT noteId FROM note;"))
+        if id:
+            noteIds.append([id])
         else:
-            for keyword in keywords:
-                if self.debug:
-                    print "keyword:", keyword, "..."
-                keywordId = self.cur.execute("SELECT keywordId FROM keyword WHERE keyword = ?;", [keyword])
-                try:
-                    keywordId = self.con.execute("SELECT keywordId FROM keyword WHERE keyword = ?;", [keyword]).fetchone()
-                    if keywordId:
-                        for noteId in self.cur.execute("SELECT noteId FROM notekeyword WHERE keywordId = ?;", keywordId):
-                            if self.debug:
-                                print '  noteId:', noteId
-                            if noteId not in noteIds:
-                                noteIds.append(noteId)
-                except:
-                    print "problem"
-                    pass
+            if keywords[0] == "?":
+                noteIds.extend(self.con.execute("SELECT noteId FROM note;"))
+            else:
+                for keyword in keywords:
+                    if self.debug:
+                        print "keyword:", keyword, "..."
+                    keywordId = self.cur.execute("SELECT keywordId FROM keyword WHERE keyword = ?;", [keyword])
+                    try:
+                        keywordId = self.con.execute("SELECT keywordId FROM keyword WHERE keyword = ?;", [keyword]).fetchone()
+                        if keywordId:
+                            for noteId in self.cur.execute("SELECT noteId FROM notekeyword WHERE keywordId = ?;", keywordId):
+                                if self.debug:
+                                    print '  noteId:', noteId
+                                if noteId not in noteIds:
+                                    noteIds.append(noteId)
+                    except:
+                        print "problem"
+                        pass
         rval = []
         for n in noteIds:
             note = self.cur.execute("SELECT noteId, authorId, date, title, content, privacy FROM note WHERE noteId=?;", n).fetchone()
