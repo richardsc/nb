@@ -106,6 +106,10 @@ At present, the only way to find notes is by searching for a keyword, e.g.
 
     ./nb find --keyword "lecture"
 
+Note that the search is fuzzy, so that e.g. "leture" would get the same results
+as "lecture".  However, this scheme can have surprising results, so the
+``--strict`` commandline argument is provided, to do strict searches.
+
 To get all the notes, use
 
     ./nb find
@@ -113,6 +117,7 @@ To get all the notes, use
 To find a note with a given ID, use e.g.
 
     ./nb find --id 1
+
 
 ### Export notes
 
