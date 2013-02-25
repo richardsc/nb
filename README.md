@@ -116,6 +116,22 @@ Notes may be exported to a JSON file by e.g.
 
     ./nb find --format json > notes.json
 
+or probably more usefully, in plain format by e.g.
+
+    ./nb find > notes.plain
+
+## Import notes
+
+An individual note (e.g. a chunk of information from the ``notes.plain`` file
+created immediately above) can be imported by e.g.
+
+    ./nb add --format plain < notes.plain
+
+This, combined with the export mechanism, provides an easy way to email notes
+to colleagues, so they can import them into their own databases.
+
+Bug: this only works for *single* notes, at the present time.
+
 ### Dump database
 
 Advanced users may want to dump the whole database with
