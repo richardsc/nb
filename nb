@@ -42,6 +42,7 @@ parser.add_argument("--debug", action="store_true", dest="debug", default=False,
 parser.add_argument("--privacy", type=int, default=0, help="set privacy level (0=open, 1=closed)")
 parser.add_argument("--file", type=str, help="filename for input (add) or output (find)")
 parser.add_argument("--db", type=str, default=defaultDatabase, help="filename for database")
+parser.add_argument("--strict", action="store_true", default=False, help="use strict search?")
 args = parser.parse_args()
 
 args.keywords = args.keywords.split(',')
@@ -166,11 +167,11 @@ if args.action == "add":
 
 if args.action == "find":
     if args.keywords[0] != '':
-        found = nb.find(keywords=args.keywords, format=format)
+        found = nb.find(keywords=args.keywords, format=format, strict=args.strict)
     elif args.id:
-        found = nb.find(id=args.id, format=format)
+        found = nb.find(id=args.id, format=format, strict=args.strict)
     else:
-        found = nb.find(keywords='?'.split(','), format=format)
+        found = nb.find(keywords='?'.split(','), format=format, strict=args.strict)
     for f in found:
         if args.format == "json":
             print f['json']

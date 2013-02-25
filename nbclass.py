@@ -4,6 +4,7 @@ import sqlite3 as sqlite
 import datetime
 import os.path
 import json
+import difflib
 
 class Nb:
     def __init__(self, db="nb.db", authorId=1, debug=0):
@@ -122,7 +123,7 @@ class Nb:
         self.con.commit()
 
 
-    def find(self, id=None, keywords="", format="plain"):
+    def find(self, id=None, keywords="", format="plain", strict=False):
         '''Search notes for a given id or keyword, printing the results in
         either 'plain' or 'JSON' format.'''
         noteIds = []
@@ -132,6 +133,13 @@ class Nb:
             if keywords[0] == "?":
                 noteIds.extend(self.con.execute("SELECT noteId FROM note;"))
             else:
+                if not strict:
+                    keywordsKnown = []
+                    for k in self.cur.execute("SELECT keyword FROM keyword;").fetchall():
+                        keywordsKnown.extend(k)
+                    keywordsFuzzy = difflib.get_close_matches(keywords[0], keywordsKnown, n=1, cutoff=0.6) # FIXME: multiple keywords
+                    if len(keywordsFuzzy) > 0:
+                        keywords = [keywordsFuzzy[0]]
                 for keyword in keywords:
                     if self.debug:
                         print "keyword:", keyword, "..."
@@ -145,7 +153,7 @@ class Nb:
                                 if noteId not in noteIds:
                                     noteIds.append(noteId)
                     except:
-                        print "problem"
+                        print "problem finding keyword or note in database"
                         pass
         rval = []
         for n in noteIds:
