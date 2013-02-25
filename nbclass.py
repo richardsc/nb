@@ -39,6 +39,7 @@ class Nb:
             v = self.cur.execute("SELECT major,minor FROM version;").fetchone()
             self.dbversion = v
         except:
+            self.dbversion = [0, 0] # started storing version at [0, 1]
             pass
 
     def version(self):
