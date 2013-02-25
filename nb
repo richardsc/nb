@@ -155,7 +155,7 @@ if args.action == "add":
         content = ""
         while True:
             c = raw_input("> ").rstrip('\n')
-            if c[0] == '.':
+            if c and c[0] == '.':
                 break
             else:
                 content = content + c + '\n'
