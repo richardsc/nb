@@ -18,7 +18,7 @@ import os
 import re
 
 # look in ~/.nbrc to see if a database is named there
-defaultDatabase = "~/Dropbox/nb.py"
+defaultDatabase = "~/Dropbox/nb.db"
 try:
     with open(os.path.expanduser("~/.nbrc"), "r") as f:
         tokens = f.readline().split("=")
@@ -149,8 +149,8 @@ if args.action == "add":
         msg = "Keywords (perhaps one of following) " + ",".join(str(kw[1]) for kw in keywords) + ": "
         keywords = raw_input(msg).split(',')
         title = raw_input("Title: ")
-        privacy = raw_input("Privacy (numeric): ")
-        privacy = int(privacy)
+        #privacy = raw_input("Privacy (numeric): ")
+        #privacy = int(privacy)
         print "Content: ('.' as first charcter of line, to end)"
         content = ""
         while True:
@@ -160,7 +160,7 @@ if args.action == "add":
             else:
                 content = content + c + '\n'
         content.rstrip('\n')
-        id = nb.add(title=title, keywords=keywords, content=content, privacy=privacy)
+        id = nb.add(title=title, keywords=keywords, content=content)
     else:
         id = nb.add(title=args.title, keywords=args.keywords, content=args.content, privacy=args.privacy)
 
