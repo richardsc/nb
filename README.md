@@ -163,3 +163,16 @@ database daily (adjust the filenames appropriately).
 (This could be done better by checking the sha value of the file, to only
 backup when things have changed.)
 
+## Discussion items
+
+The author would like advice on any bugs that users find, or any features that
+they might like to see.  Almost any advice is likely to be helpful.  To get the
+ball rolling, below is a list of topics that are likely to come up:
+
+* there should be a graphical interface
+
+* for items of the "to do" variety, due-dates would be helpful
+
+* ... your item here :-)
+
+
