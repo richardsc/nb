@@ -1,44 +1,47 @@
-# 'nb', an open-source note-taking CLI/web/gui application
+## Abstract
+
+'nb' is an open-source application for recording textual notes and associated
+meta-information that may be used for later retrieval.
 
 ## Overview
 
-It is easy to record brief notes for use in the short term, e.g. by writing a
-line in a file named "README".  Others might call the file "notes" or,
-depending on the content, "plans" or "ideas", "problems", etc.  As notes
-accumulate, however, it can grow increasingly difficult to decide in which file
-to put a new note.  Does an idea for fixing a problem belong in "ideas" or
-"problems"?  One solution to this is to use a single file that merges notes of
-a variety of types, with a categorization scheme to organize the material.
-That scheme might involve titles and keywords that the author has associated
-with notes, the time of note creation, etc.
+Most people find it helpful to store notes on a computer.  Some use specialized
+applications for this, while others prefer the simplicity of recording their
+thoughts in a plain-text file, using a familiar text editor.  In this second
+option, it is common to associate the text files with projects or tasks.
+Depending on the intent, the file might be named "README" or perhaps something
+more meaningful, such as "PLANS," "TASKS," "BUGS," "IDEAS," etc.  Thus, for M
+projects and N categories, there might be M x N files, and the handling of all
+those files can grow complicated, whether adding new material or finding old
+material.
 
-For small tasks, a simple text file can work quite well, but this approach
-grows cumbersome as notes accumulate, both for adding notes and for finding
-them.  Using a general-purpose editor is risky because the process of adding a
-new note can result in the destruction of existing notes.  Sifting through
-notes with a general editor is also problematic, unless strict formatting
-procedures are followed.
+A reasonable solution is to have a single file, in which notes can be stored
+along with meta-information, such as keywords.  For example, plans for a
+project named "foo" might be flagged with the keywords *foo* and *plans*, and
+retrieving those plans would be a simple matter of filtering on those keywords.
 
-Using a database to store notes solves these problems.  Databases are ideal for
-binding notes together with keywords, etc., and the isolation they provide
-between the data and the user is helpful in preventing accidental deletion of
-notes.
+Storing notes along with keywords (and other meta-information, such as the
+date, the author, etc.) is somewhat complicated in a text file that is to be
+edited with a general text editor, not least because a typo might damage the
+file.  Storing notes in a database is a good solution to this problem, and it
+offers the additional advantage of greatly improved lookup speed.  The
+disadvantage of the database, however, is that an application is required to
+act as an interface between the user and the data.  If the application is
+commercial, then users expose themselves to the risk of losing all their work,
+if the company stops supporting the software.
 
 The ``nb`` application (named for the Latin phrase "nota bene") is designed
-with these things in mind.  It provides several ways to add notes, and to
-search through existing notes.  So far, it functions entirely at the unix
-command line, and is most suited for power users who are unafraid of that
-environment.
+with all these things in mind.  It is deliberately restricted in its features,
+focussing on the creation of textual notes and their retrieval.  Complex
+formatting is not provided, nor is the ability to add non-textual material.  In
+the present early version, ``nb`` functions entirely at the unix command line,
+and is most suited for power users who are unafraid of that environment.
 
-The development model for ``nb`` is entirely open-source.  It stores notes in a
-database in the [sqlite](http://www.sqlite.org/) format, and is coded in the
-[python](http://python.org) programming language; both of these are open-source
-products that are freely available on most computing platforms.  The
-open-source nature of ``nb`` is important because it saves the problem that
-arises when users grow dependent on a software tool that may cease to work if 
-a company goes out of business.
+The development model for ``nb`` is entirely open-source, and the coding relies
+on popular tools that will be familiar to many programmers, mitigating against
+obsolescence. 
 
-## Timeline
+## Development timeline
 
 ### 2013-02
 
