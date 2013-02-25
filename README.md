@@ -60,16 +60,16 @@ obsolescence.
 * Develop a trial web-based version.
 
 
-### Using nb
+## Using nb
 
-#### Installation
+### Installation
 
 Download the source code to some directory, and then create an alias along the
 following lines, adjusted for the directory name
 
     alias nb=/Users/kelley/src/nb/nb
 
-#### Specifying a database file
+### Specifying a database file
 
 The default database file is ``~/Dropbox/nb.db``, but this may not suit all
 users, so there are two ways to specify a different file.  The first way is to
@@ -79,14 +79,14 @@ for example it might contain the following.
 
     db = "~/Dropbox/nb.db"
 
-#### Create a database
+### Create a database
 
     ./nb RESET
 
 Important: this will erase an existing database.
 
 
-#### Add notes
+### Add notes
 
 This may be done one at a time, with commandline arguments, e.g.
 
@@ -100,7 +100,7 @@ One or more notes can also be added through input of a JSON file, e.g.
 
     ./nb add --format json --file note.json
 
-#### Find notes
+### Find notes
 
 At present, the only way to find notes is by searching for a keyword, e.g.
 
@@ -110,19 +110,19 @@ To get all the notes, use
 
     ./nb find
 
-#### Export notes
+### Export notes
 
 Notes may be exported to a JSON file by e.g.
 
     ./nb find --format json > notes.json
 
-#### Dump database
+### Dump database
 
 Advanced users may want to dump the whole database with
 
     echo ".dump" | sqlite3 nb.db
 
-#### Back up the database
+### Back up the database
 
 It is a good idea to set up a crontab entry like the following, to back up the
 database daily (adjust the filenames appropriately).
