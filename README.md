@@ -175,4 +175,10 @@ ball rolling, below is a list of topics that are likely to come up:
 
 * ... your item here :-)
 
+* perhaps there should be an option called --due that would add a time entry in
+  a new field in the database.  For example ``nb add ... --due tommorrow`` or
+``nb add ... --due 24h`` would yield a date entry 24h after addition.  A
+similar scheme for ``nb find`` could yield a primitive organizer, e.g. ``nb
+find --due today`` could yield items that had been marked as being due on the
+present day.
 
