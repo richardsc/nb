@@ -16,6 +16,8 @@ import sys
 import json
 import os
 import re
+import datetime
+from time import strptime
 
 # look in ~/.nbrc to see if a database is named there
 defaultDatabase = "~/Dropbox/nb.db"
@@ -181,7 +183,29 @@ if args.action == "find":
             print "%s\n   <%s>" % (f['title'], f['noteId']),
             print "[", " ] [ ".join(f['keywords'][i] for i in range(len(f['keywords']))), "]",
             if len(f['due']) > 0:
-                print " (due %s)" % f['due']
+                due = datetime.datetime.strptime(f['due'], '%Y-%m-%d %H:%M:%S.%f')
+                #print " (due %s)" % f['due']
+                #print "due:", due
+                now = datetime.datetime.now()
+                #print "now:", now
+                when = (due - now).total_seconds()
+                #print "when:", when
+                if due > now:
+                    if when < 2*3600:
+                        print "(due in %d minutes)" % (when / 60)
+                    elif when < 86400:
+                        print "(due in %d hours)" % (when / 3600)
+                    else:
+                        print "(due in %d days)" % (when / 3600 / 24)
+                else:
+                    if when < 2*3600:
+                        print "(overdue by %d minutes)" % (when / 60)
+                    elif when < 86400:
+                        print "(overdue by %d hours)" % (when / 3600)
+                    else:
+                        print "(overdue by %d days)" % (when / 3600 / 24)
+            else:
+                print ''
             content = f['content'].replace('\\n', '\n')
             for contentLine in content.split('\n'):
                 print "  ", contentLine.rstrip('\n')
