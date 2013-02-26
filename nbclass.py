@@ -32,7 +32,7 @@ class Nb:
         self.cur = con.cursor()
         self.authorId = authorId
         self.debug = debug 
-        self.appversion = [0, 1]
+        self.appversion = [0, 2]
         self.dbversion = self.appversion
         if mustInitialize:
             self.initialize()
@@ -40,8 +40,32 @@ class Nb:
             v = self.cur.execute("SELECT major,minor FROM version;").fetchone()
             self.dbversion = v
         except:
+            print "cannot get version number in database"
             self.dbversion = [0, 0] # started storing version at [0, 1]
             pass
+        appversion = 10*self.appversion[0] + self.appversion[1]
+        dbversion = 10*self.dbversion[0] + self.dbversion[1]
+        if debug:
+            print "appversion: %d.%d" % (self.appversion[0], self.appversion[1])
+            print "dbversion: %d.%d" % (self.dbversion[0], self.dbversion[1])
+        if appversion > dbversion: # FIXME: this only works for versions 0.1 and 0.2
+            print "Updating the database from version %d.%d to %d.%d" % (self.dbversion[0], self.dbversion[1], self.appversion[0], self.appversion[1])
+            try:
+                self.cur.execute('ALTER TABLE note ADD due DEFAULT "";')
+                print "Adding a column named 'due' to the database table named 'note'."
+            except:
+                print "Problem adding the 'due' column to the table 'note'"
+            self.con.commit()
+            try:
+                self.cur.execute("DELETE FROM version;")
+                self.cur.execute("INSERT INTO version(major, minor) VALUES (?,?);",
+                        (self.appversion[0], self.appversion[1]))
+                print "Updating the database table 'version' to value", self.appversion
+            except:
+                print "Problem updating database version to %d.%d" % (self.appversion[0], self.appversion[1])
+            self.con.commit()
+
+
 
     def version(self):
         print "Application version %d.%d; database version %d.%d" % (self.appversion[0], self.appversion[1], self.dbversion[0], self.dbversion[1])
@@ -57,6 +81,7 @@ class Nb:
         self.cur.execute("CREATE TABLE alias(aliasId integer primary key autoincrement, item, alias);")
         self.cur.execute("CREATE TABLE keyword(keywordId integer primary key autoincrement, keyword);")
         self.cur.execute("CREATE TABLE notekeyword(notekeywordId integer primary key autoincrement, noteid, keywordid);")
+        self.con.commit()
 
     def add(self, title="", keywords="", content="", privacy=0):
         ''' Add a note to the database.  The title should be short (perhaps 3
@@ -157,20 +182,27 @@ class Nb:
                         pass
         rval = []
         for n in noteIds:
-            note = self.cur.execute("SELECT noteId, authorId, date, title, content, privacy FROM note WHERE noteId=?;", n).fetchone()
-            privacy = note[5]
-            keywordIds = []
-            keywordIds.extend(self.con.execute("SELECT keywordid FROM notekeyword WHERE notekeyword.noteid = ?;", n))
-            keywords = []
-            for k in keywordIds:
-                keywords.append(self.cur.execute("SELECT keyword FROM keyword WHERE keywordId = ?;", k).fetchone()[0])
-            if format == 'json':
-                content = note[4].replace('\n', '\\n')
-                keywordsStr = ','.join(keywords[i] for i in range(len(keywords)))
-                c = {"authorId":note[1], "date":note[2],"title":note[3],"content":content,"privacy":privacy}
-                c["keywords"] = keywordsStr
-                rval.append({"json":json.dumps(c)})
+            try:
+                note = self.cur.execute("SELECT noteId, authorId, date, title, content, privacy FROM note WHERE noteId=?;", n).fetchone()
+            except:
+                print "Problem extracting note from database"
+                next
+            if note:
+                privacy = note[5]
+                keywordIds = []
+                keywordIds.extend(self.con.execute("SELECT keywordid FROM notekeyword WHERE notekeyword.noteid = ?;", n))
+                keywords = []
+                for k in keywordIds:
+                    keywords.append(self.cur.execute("SELECT keyword FROM keyword WHERE keywordId = ?;", k).fetchone()[0])
+                if format == 'json':
+                    content = note[4].replace('\n', '\\n')
+                    keywordsStr = ','.join(keywords[i] for i in range(len(keywords)))
+                    c = {"authorId":note[1], "date":note[2],"title":note[3],"content":content,"privacy":privacy}
+                    c["keywords"] = keywordsStr
+                    rval.append({"json":json.dumps(c)})
+                else:
+                    rval.append({"noteId":note[0], "title":note[3], "keywords":keywords,
+                        "content":note[4], "privacy":note[5]})
             else:
-                rval.append({"noteId":note[0], "title":note[3], "keywords":keywords,
-                    "content":note[4], "privacy":note[5]})
+                print "There is no note numbered %d." % n[0]
         return rval
