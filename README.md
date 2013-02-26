@@ -98,7 +98,7 @@ or via prompted interaction,
 
 One or more notes can also be added through input of a JSON file, e.g.
 
-    ./nb add --format json --file note.json
+    ./nb add --mode json --file note.json
 
 ### Find notes
 
@@ -123,7 +123,7 @@ To find a note with a given ID, use e.g.
 
 Notes may be exported to a JSON file by e.g.
 
-    ./nb find --format json > notes.json
+    ./nb find --mode json > notes.json
 
 or probably more usefully, in plain format by e.g.
 
@@ -140,7 +140,7 @@ to extract notes with keyword "arctic".
 An individual note (e.g. a chunk of information from the ``note_1.txt`` file
 created immediately above) can be imported by e.g.
 
-    ./nb add --format plain < note_1.txt
+    ./nb add --mode plain < note_1.txt
 
 This, combined with the export mechanism, provides an easy way to email notes
 to colleagues, so they can import them into their own databases.
@@ -180,10 +180,5 @@ will work on all platforms.
 similar scheme for ``nb find`` could yield a primitive organizer, e.g. ``nb
 find --due today`` could yield items that had been marked as being due on the
 present day.
-
-* the option ``--format`` is ill named, partly because it means we cannot have
-  a unique short form (since we also have ``--file``, which seems to be a good
-name.  Maybe ``--format`` should be ``--style``??   I'm not sure on a good
-name.  Suggestions??
 
 * ... your item here :-)

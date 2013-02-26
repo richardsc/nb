@@ -5,6 +5,7 @@ import datetime
 import os.path
 import json
 import difflib
+import re
 
 class Nb:
     def __init__(self, db="nb.db", authorId=1, debug=0):
@@ -83,16 +84,18 @@ class Nb:
         self.cur.execute("CREATE TABLE notekeyword(notekeywordId integer primary key autoincrement, noteid, keywordid);")
         self.con.commit()
 
-    def add(self, title="", keywords="", content="", privacy=0):
+    def add(self, title="", keywords="", content="", due="", privacy=0):
         ''' Add a note to the database.  The title should be short (perhaps 3
         to 7 words).  The keywords are comma-separated, and should be similar
         in style to others in the database.  The content may be of any length.
         Notes with privacy > 0 are increasingly hidden (or will be, when the
         application is more complete). '''
+
+        due = self.interpret_date(due)
         now = datetime.datetime.now()
         date = now.strftime("%Y-%m-%d %H:%M:%S")
-        self.cur.execute("INSERT INTO note(authorId, date, title, content, privacy) VALUES(?, ?, ?, ?, ?);",
-                (self.authorId, date, title, content, privacy))
+        self.cur.execute("INSERT INTO note(authorId, date, title, content, privacy, due) VALUES(?, ?, ?, ?, ?, ?);",
+                (self.authorId, date, title, content, privacy, due))
         noteId = self.cur.lastrowid
         for keyword in keywords:
             if self.debug:
@@ -148,7 +151,7 @@ class Nb:
         self.con.commit()
 
 
-    def find(self, id=None, keywords="", format="plain", strict=False):
+    def find(self, id=None, keywords="", mode="plain", strict=False):
         '''Search notes for a given id or keyword, printing the results in
         either 'plain' or 'JSON' format.'''
         noteIds = []
@@ -183,18 +186,18 @@ class Nb:
         rval = []
         for n in noteIds:
             try:
-                note = self.cur.execute("SELECT noteId, authorId, date, title, content, privacy FROM note WHERE noteId=?;", n).fetchone()
+                note = self.cur.execute("SELECT noteId, authorId, date, title, content, due, privacy FROM note WHERE noteId=?;", n).fetchone()
             except:
                 print "Problem extracting note from database"
                 next
             if note:
-                privacy = note[5]
+                privacy = note[6]
                 keywordIds = []
                 keywordIds.extend(self.con.execute("SELECT keywordid FROM notekeyword WHERE notekeyword.noteid = ?;", n))
                 keywords = []
                 for k in keywordIds:
                     keywords.append(self.cur.execute("SELECT keyword FROM keyword WHERE keywordId = ?;", k).fetchone()[0])
-                if format == 'json':
+                if mode == 'json':
                     content = note[4].replace('\n', '\\n')
                     keywordsStr = ','.join(keywords[i] for i in range(len(keywords)))
                     c = {"authorId":note[1], "date":note[2],"title":note[3],"content":content,"privacy":privacy}
@@ -202,7 +205,34 @@ class Nb:
                     rval.append({"json":json.dumps(c)})
                 else:
                     rval.append({"noteId":note[0], "title":note[3], "keywords":keywords,
-                        "content":note[4], "privacy":note[5]})
+                        "content":note[4], "due":note[5], "privacy":note[6]})
             else:
                 print "There is no note numbered %d." % n[0]
         return rval
+
+    def interpret_date(self, due):
+        # catch "tomorrow" and "Nhours", "Ndays", "Nweeks" (with N an integer)
+        now = datetime.datetime.now()
+        if due == "tomorrow":
+            due = now + datetime.timedelta(days=1)
+        else:
+            ## try hours, then days, then weeks.
+            test = re.compile(r'(\d+)([ ]*hour)(s*)').match(due)
+            if test:
+                due = now + datetime.timedelta(hours=int(test.group(1)))
+            else:
+                test = re.compile(r'(\d+)([ ]*day)(s*)').match(due)
+                if test:
+                    due = now + datetime.timedelta(days=int(test.group(1)))
+                else:
+                    test = re.compile(r'(\d+)([ ]*week)(s*)').match(due)
+                    if test:
+                        due = now + datetime.timedelta(weeks=int(test.group(1)))
+                        #print "decoded weeks"
+                    else:
+                        print "cannot decode due date"
+                        due = ""
+        if self.debug:
+            print "due '%s'" % due
+        return due
+
