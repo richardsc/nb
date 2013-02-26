@@ -32,14 +32,14 @@ except:
 
 parser = argparse.ArgumentParser()
 parser.add_argument('action', choices=['add', 'find', 'delete', 'version', 'RESET', 'cleanup'])
-parser.add_argument('--id', type=int, help="ID number of note to delete")
+parser.add_argument('-i', '--id', type=int, help="ID number of note to delete")
 parser.add_argument('--format', type=str, default="interactive", choices=['interactive', 'plain', 'json'],
-        help="file containing JSON-formatted 'title', 'content' and 'keyword'")
-parser.add_argument("--title", type=str, default="", help="title (short)")
-parser.add_argument("--keywords", type=str, default="", help="comma-separated keywords")
-parser.add_argument("--content", type=str, default="", help="content (long; markdown format)")
-parser.add_argument("--debug", action="store_true", dest="debug", default=False, help="set debugging on")
-parser.add_argument("--privacy", type=int, default=0, help="set privacy level (0=open, 1=closed)")
+        help="method for i/o") # name clash with -f for file ... also, format is not evocative; maybe 'type'?
+parser.add_argument('-t', "--title", type=str, default="", help="title (short)")
+parser.add_argument("-k", "--keywords", type=str, default="", help="comma-separated keywords")
+parser.add_argument('-c', "--content", type=str, default="", help="content (long; markdown format)")
+parser.add_argument('-d', "--debug", action="store_true", dest="debug", default=False, help="set debugging on")
+parser.add_argument('-p', "--privacy", type=int, default=0, help="set privacy level (0=open, 1=closed)")
 parser.add_argument("--file", type=str, help="filename for input (add) or output (find)")
 parser.add_argument("--db", type=str, default=defaultDatabase, help="filename for database")
 parser.add_argument("--strict", action="store_true", default=False, help="use strict search?")

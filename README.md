@@ -169,11 +169,10 @@ The author would like advice on any bugs that users find, or any features that
 they might like to see.  Almost any advice is likely to be helpful.  To get the
 ball rolling, below is a list of topics that are likely to come up:
 
-* there should be a graphical interface
-
-* for items of the "to do" variety, due-dates would be helpful
-
-* ... your item here :-)
+* There should be a graphical interface.  This is a lot of work, and will not
+  be of too much use to power users, so it will come only after the general
+functionality is settled.  Also, it will likely be web-based because then it
+will work on all platforms.
 
 * perhaps there should be an option called --due that would add a time entry in
   a new field in the database.  For example ``nb add ... --due tommorrow`` or
@@ -182,3 +181,9 @@ similar scheme for ``nb find`` could yield a primitive organizer, e.g. ``nb
 find --due today`` could yield items that had been marked as being due on the
 present day.
 
+* the option ``--format`` is ill named, partly because it means we cannot have
+  a unique short form (since we also have ``--file``, which seems to be a good
+name.  Maybe ``--format`` should be ``--style``??   I'm not sure on a good
+name.  Suggestions??
+
+* ... your item here :-)
