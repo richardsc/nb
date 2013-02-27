@@ -163,6 +163,18 @@ database daily (adjust the filenames appropriately).
 (This could be done better by checking the sha value of the file, to only
 backup when things have changed.)
 
+### Task count in bash prompt
+
+To get a list of notes that are due today, put the following in your ``~/.bash_profile`` file:
+
+    function nb_count {
+        nb find --due today --count
+    }
+    PS1="\h:\W"
+    export PS1="$PS1<\$(nb_count)> "
+
+
+
 ## Discussion items
 
 The author would like advice on any bugs that users find, or any features that
