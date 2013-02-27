@@ -186,11 +186,7 @@ ball rolling, below is a list of topics that are likely to come up:
 functionality is settled.  Also, it will likely be web-based because then it
 will work on all platforms.
 
-* perhaps there should be an option called --due that would add a time entry in
-  a new field in the database.  For example ``nb add ... --due tommorrow`` or
-``nb add ... --due 24h`` would yield a date entry 24h after addition.  A
-similar scheme for ``nb find`` could yield a primitive organizer, e.g. ``nb
-find --due today`` could yield items that had been marked as being due on the
-present day.
+* There should be an interface to a text editor, both for adding items and
+  editing them.  (Suggestion of @richardsc)
 
 * ... your item here :-)
