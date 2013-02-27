@@ -91,7 +91,7 @@ class Nb:
         Notes with privacy > 0 are increasingly hidden (or will be, when the
         application is more complete). '''
 
-        due = self.interpret_date(due)
+        due = self.interpret_time(due)[0]
         now = datetime.datetime.now()
         date = now.strftime("%Y-%m-%d %H:%M:%S")
         self.cur.execute("INSERT INTO note(authorId, date, title, content, privacy, due) VALUES(?, ?, ?, ?, ?, ?);",
@@ -210,29 +210,31 @@ class Nb:
                 print "There is no note numbered %d." % n[0]
         return rval
 
-    def interpret_date(self, due):
+    def interpret_time(self, due):
         # catch "tomorrow" and "Nhours", "Ndays", "Nweeks" (with N an integer)
         now = datetime.datetime.now()
-        if due == "tomorrow":
-            due = now + datetime.timedelta(days=1)
+        sperday = 86400
+        if due == "today":
+            due = (now, sperday)
+        elif due == "tomorrow":
+            due = (now + datetime.timedelta(days=1), sperday)
         else:
             ## try hours, then days, then weeks.
             test = re.compile(r'(\d+)([ ]*hour)(s*)').match(due)
             if test:
-                due = now + datetime.timedelta(hours=int(test.group(1)))
+                due = (now + datetime.timedelta(hours=int(test.group(1))), sperday/24)
             else:
                 test = re.compile(r'(\d+)([ ]*day)(s*)').match(due)
                 if test:
-                    due = now + datetime.timedelta(days=int(test.group(1)))
+                    due = (now + datetime.timedelta(days=int(test.group(1))), sperday/1)
                 else:
                     test = re.compile(r'(\d+)([ ]*week)(s*)').match(due)
                     if test:
-                        due = now + datetime.timedelta(weeks=int(test.group(1)))
+                        due = (now + datetime.timedelta(weeks=int(test.group(1))), sperday*7)
                         #print "decoded weeks"
                     else:
-                        print "cannot decode due date"
-                        due = ""
+                        due = (None, None)
         if self.debug:
-            print "due '%s'" % due
+            print "due '%s'; tolerance '%s'" % (due[0], due[1])
         return due
 

@@ -130,7 +130,7 @@ if args.action == "add":
                 print "analysing line \"%s\"" % line
             if title == "":
                 if line == "":
-                    next
+                    next # FIXME: should this be 'continue'?
                 title = line.strip()
             elif '<' in line:
                 keywords = re.sub(r'<.*>', '', line).strip()
@@ -140,7 +140,7 @@ if args.action == "add":
                 keywords = keywords.split(',')
             else:
                 if content == "" and line == "":
-                    next
+                    next # FIXME: should this be 'continue'?
                 content = content.lstrip() + line + '\n'
         if nb.debug:
             print "title:", title
@@ -169,6 +169,8 @@ if args.action == "add":
         id = nb.add(title=args.title, keywords=args.keywords, content=args.content, due=args.due, privacy=args.privacy)
 
 if args.action == "find":
+    due_requested = nb.interpret_time(args.due)
+    #print "due_requested:", due_requested
     if args.keywords[0] != '':
         found = nb.find(keywords=args.keywords, mode=args.mode, strict=args.strict)
     elif args.id:
@@ -176,6 +178,21 @@ if args.action == "find":
     else:
         found = nb.find(keywords='?'.split(','), mode=args.mode, strict=args.strict)
     for f in found:
+        due = f['due']
+        #print "len(due): %d" % len(due)
+        if due_requested[0]:
+            if len(due) < 1:
+                continue
+            #print "due (%s)" % due_requested[0]
+            due = datetime.datetime.strptime(due, '%Y-%m-%d %H:%M:%S.%f')
+            #print "due:", due
+            if due > due_requested[0]:
+                when = (due - due_requested[0]).total_seconds()
+            else:
+                when = (due_requested[0]- due).total_seconds()
+            #print 'when:', when
+            if when > due_requested[1]:
+                continue
         if args.mode== "json":
             print f['json']
         else:
