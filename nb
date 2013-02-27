@@ -40,6 +40,7 @@ parser.add_argument('-m', '--mode', type=str, default="interactive", choices=['i
 parser.add_argument('-t', "--title", type=str, default="", help="title (short)")
 parser.add_argument("-k", "--keywords", type=str, default="", help="comma-separated keywords")
 parser.add_argument('-c', "--content", type=str, default="", help="content")
+parser.add_argument("--count", action="store_true", dest="count", default=False, help="report only count of found results")
 parser.add_argument('-d', "--debug", action="store_true", dest="debug", default=False, help="set debugging on")
 parser.add_argument('-p', "--privacy", type=int, default=0, help="set privacy level (0=open, 1=closed)")
 parser.add_argument("--file", type=str, help="filename for input (add) or output (find)")
@@ -177,6 +178,7 @@ if args.action == "find":
         found = nb.find(id=args.id, mode=args.mode, strict=args.strict)
     else:
         found = nb.find(keywords='?'.split(','), mode=args.mode, strict=args.strict)
+    count = 0
     for f in found:
         due = f['due']
         #print "len(due): %d" % len(due)
@@ -193,7 +195,10 @@ if args.action == "find":
             #print 'when:', when
             if when > due_requested[1]:
                 continue
-        if args.mode== "json":
+        count += 1
+        if args.count:
+            continue
+        elif args.mode == "json":
             print f['json']
         else:
             #print "%s   <%s>" % (f['title'], f['noteId']),
@@ -227,6 +232,8 @@ if args.action == "find":
             for contentLine in content.split('\n'):
                 print "  ", contentLine.rstrip('\n')
             print ''
+    if args.count:
+        print count
 
 if args.action == "delete":
     if not args.id:
