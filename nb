@@ -181,7 +181,7 @@ if args.action == "find":
         due = f['due']
         #print "len(due): %d" % len(due)
         if due_requested[0]:
-            if len(due) < 1:
+            if not due:
                 continue
             #print "due (%s)" % due_requested[0]
             due = datetime.datetime.strptime(due, '%Y-%m-%d %H:%M:%S.%f')
@@ -200,7 +200,7 @@ if args.action == "find":
             print "%s\n   <%s>" % (f['title'], f['noteId']),
             print "[", " ] [ ".join(f['keywords'][i] for i in range(len(f['keywords']))), "]",
             if f['due'] and len(f['due']) > 0:
-                due = datetime.datetime.strptime(f['due'], '%Y-%m-%d %H:%M:%S.%f')
+                due = datetime.datetime.strptime(f['due'], '%Y-%m-%d %H:%M:%S.%f') # FIXME: make this 'due' DRY (+-20 lines)
                 #print " (due %s)" % f['due']
                 #print "due:", due
                 now = datetime.datetime.now()
