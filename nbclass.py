@@ -1,4 +1,5 @@
 #!/usr/bin/python
+from __future__ import print_function
 import sys
 import sqlite3 as sqlite
 import datetime
@@ -17,17 +18,17 @@ class Nb:
 
         '''
         if debug:
-            print "Working with database named '%s' (before path expansion)." % db
+            print("Working with database named '%s' (before path expansion)." % db)
         db = os.path.expanduser(db)
         if debug:
-            print "Working with database named '%s' (after path expansion)." % db
+            print("Working with database named '%s' (after path expansion)." % db)
         mustInitialize = not os.path.exists(db)
         if mustInitialize:
-            print "Warning: there is no database named '%s', so one is being created" % db
+            print("Warning: there is no database named '%s', so one is being created" % db)
         try:
             con = sqlite.connect(db)
         except:
-            print "Error opening connection to database named '%s'" % db
+            print("Error opening connection to database named '%s'" % db)
             sys.exit(1)
         self.con = con
         self.cur = con.cursor()
@@ -41,35 +42,35 @@ class Nb:
             v = self.cur.execute("SELECT major,minor FROM version;").fetchone()
             self.dbversion = v
         except:
-            print "cannot get version number in database"
+            print("cannot get version number in database")
             self.dbversion = [0, 0] # started storing version at [0, 1]
             pass
         appversion = 10*self.appversion[0] + self.appversion[1]
         dbversion = 10*self.dbversion[0] + self.dbversion[1]
         if debug:
-            print "appversion: %d.%d" % (self.appversion[0], self.appversion[1])
-            print "dbversion: %d.%d" % (self.dbversion[0], self.dbversion[1])
+            print("appversion: %d.%d" % (self.appversion[0], self.appversion[1]))
+            print("dbversion: %d.%d" % (self.dbversion[0], self.dbversion[1]))
         if appversion > dbversion: # FIXME: this only works for versions 0.1 and 0.2
-            print "Updating the database from version %d.%d to %d.%d" % (self.dbversion[0], self.dbversion[1], self.appversion[0], self.appversion[1])
+            print("Updating the database from version %d.%d to %d.%d" % (self.dbversion[0], self.dbversion[1], self.appversion[0], self.appversion[1]))
             try:
                 self.cur.execute('ALTER TABLE note ADD due DEFAULT "";')
-                print "Adding a column named 'due' to the database table named 'note'."
+                print("Adding a column named 'due' to the database table named 'note'.")
             except:
-                print "Problem adding the 'due' column to the table 'note'"
+                print("Problem adding the 'due' column to the table 'note'")
             self.con.commit()
             try:
                 self.cur.execute("DELETE FROM version;")
                 self.cur.execute("INSERT INTO version(major, minor) VALUES (?,?);",
                         (self.appversion[0], self.appversion[1]))
-                print "Updating the database table 'version' to value", self.appversion
+                print("Updating the database table 'version' to value", self.appversion)
             except:
-                print "Problem updating database version to %d.%d" % (self.appversion[0], self.appversion[1])
+                print("Problem updating database version to %d.%d" % (self.appversion[0], self.appversion[1]))
             self.con.commit()
 
 
 
     def version(self):
-        print "Application version %d.%d; database version %d.%d" % (self.appversion[0], self.appversion[1], self.dbversion[0], self.dbversion[1])
+        print("Application version %d.%d; database version %d.%d" % (self.appversion[0], self.appversion[1], self.dbversion[0], self.dbversion[1]))
 
     def initialize(self, author=""):
         ''' Initialize the database.  This is dangerous since it removes any
@@ -99,15 +100,15 @@ class Nb:
         noteId = self.cur.lastrowid
         for keyword in keywords:
             if self.debug:
-                print " inserting keyword:", keyword
+                print(" inserting keyword:", keyword)
             keywordId = self.con.execute("SELECT keywordId FROM keyword WHERE keyword = ?;", [keyword]).fetchone()
             if keywordId:
                 if self.debug:
-                    print "(existing keyword with id:", keywordId, ")"
+                    print("(existing keyword with id:", keywordId, ")")
                 keywordId = keywordId[0]
             else:
                 if self.debug:
-                    print "(new keyword)"
+                    print("(new keyword)")
                 self.cur.execute("INSERT INTO keyword(keyword) VALUES (?);", [keyword])
                 keywordId = self.cur.lastrowid
             self.con.execute("INSERT INTO notekeyword(noteId, keywordID) VALUES(?, ?)", [noteId, keywordId])
@@ -116,28 +117,28 @@ class Nb:
 
     def delete(self, id=-1):
         if id < 0:
-            print "cannot delete a note with a negative id number (%s)" % id
+            print("cannot delete a note with a negative id number (%s)" % id)
             return False
         if self.debug:
             n = self.cur.execute("SELECT noteId, title FROM note WHERE noteId = ?;", [id])
-            print "Deleting the following note:", n.fetchone()
+            print("Deleting the following note:", n.fetchone())
         try:
             self.cur.execute("DELETE FROM note WHERE noteId = ?;", [id])
         except:
-            print "there is no note numbered %d" % id
+            print("there is no note numbered %d" % id)
             return False
         try:
             self.cur.execute("DELETE FROM notekeyword WHERE noteId = ?;", [id])
         except:
-            print "there was a problem deleting keywords associated with note numbered %d" % id
+            print("there was a problem deleting keywords associated with note numbered %d" % id)
         self.cleanup()
         self.con.commit()
         return True
 
     def edit(self, id=-1):
         if id < 0:
-            print "cannot delete a note with a negative id number (%s)" % id
-        print "BUG: 'nb edit --id %d' does not work yet" % id # FIXME: use similar to 'add'
+            print("cannot delete a note with a negative id number (%s)" % id)
+        print("BUG: 'nb edit --id %d' does not work yet" % id)# FIXME: use similar to 'add'
 
     def cleanup(self):
         ''' Clean up the database, e.g. removing unused keywords.'''
@@ -148,11 +149,11 @@ class Nb:
         unusedList = [val for val in allList if val not in usedList]
         for key in unusedList:
             if self.debug:
-                print "About to delete keyword with ID %s" % key
+                print("About to delete keyword with ID %s" % key)
             try:
                 self.cur.execute("DELETE FROM keyword WHERE keywordId = ?;", key)
             except:
-                print "There was a problem deleting keyword %s" % key
+                print("There was a problem deleting keyword %s" % key)
         self.con.commit()
 
 
@@ -175,25 +176,25 @@ class Nb:
                         keywords = [keywordsFuzzy[0]]
                 for keyword in keywords:
                     if self.debug:
-                        print "keyword:", keyword, "..."
+                        print("keyword:", keyword, "...")
                     keywordId = self.cur.execute("SELECT keywordId FROM keyword WHERE keyword = ?;", [keyword])
                     try:
                         keywordId = self.con.execute("SELECT keywordId FROM keyword WHERE keyword = ?;", [keyword]).fetchone()
                         if keywordId:
                             for noteId in self.cur.execute("SELECT noteId FROM notekeyword WHERE keywordId = ?;", keywordId):
                                 if self.debug:
-                                    print '  noteId:', noteId
+                                    print('  noteId:', noteId)
                                 if noteId not in noteIds:
                                     noteIds.append(noteId)
                     except:
-                        print "problem finding keyword or note in database"
+                        print("problem finding keyword or note in database")
                         pass
         rval = []
         for n in noteIds:
             try:
                 note = self.cur.execute("SELECT noteId, authorId, date, title, content, due, privacy FROM note WHERE noteId=?;", n).fetchone()
             except:
-                print "Problem extracting note from database"
+                print("Problem extracting note from database")
                 next
             if note:
                 privacy = note[6]
@@ -212,7 +213,7 @@ class Nb:
                     rval.append({"noteId":note[0], "title":note[3], "keywords":keywords,
                         "content":note[4], "due":note[5], "privacy":note[6]})
             else:
-                print "There is no note numbered %d." % n[0]
+                print("There is no note numbered %d." % n[0])
         return rval
 
     def interpret_time(self, due):
@@ -236,10 +237,10 @@ class Nb:
                     test = re.compile(r'(\d+)([ ]*week)(s*)').match(due)
                     if test:
                         due = (now + datetime.timedelta(weeks=int(test.group(1))), sperday*7)
-                        #print "decoded weeks"
+                        #print("decoded weeks")
                     else:
                         due = (None, None)
         if self.debug:
-            print "due '%s'; tolerance '%s'" % (due[0], due[1])
+            print("due '%s'; tolerance '%s'" % (due[0], due[1]))
         return due
 
