@@ -92,9 +92,14 @@ This may be done one at a time, with commandline arguments, e.g.
 
     ./nb add --keywords 'lecture,physics,MIT' --title="Walter Lewin physics lectures" --content="http://ocw.mit.edu/courses/physics/8-01-physics-i-classical-mechanics-fall-1999/index.htm"
 
-or via prompted interaction,
+Another method is with an editor-based supply of the information, which is done
+unless ``--keywords``, ``--title``, and ``--content`` are all given, e.g.
 
     ./nb add
+
+or
+
+    ./nb add --title "a new note"
 
 One or more notes can also be added through input of a JSON file, e.g.
 
