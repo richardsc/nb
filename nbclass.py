@@ -134,6 +134,11 @@ class Nb:
         self.con.commit()
         return True
 
+    def edit(self, id=-1):
+        if id < 0:
+            print "cannot delete a note with a negative id number (%s)" % id
+        print "BUG: 'nb edit --id %d' does not work yet" % id # FIXME: use similar to 'add'
+
     def cleanup(self):
         ''' Clean up the database, e.g. removing unused keywords.'''
         allList = []
