@@ -158,14 +158,14 @@ if args.action == "add":
         print("should handle interactive now")
         keywords = nb.cur.execute("SELECT keywordId, keyword FROM keyword ORDER BY UPPER(keyword);")
         msg = "Keywords (perhaps one of following) " + ",".join(str(kw[1]) for kw in keywords) + ": "
-        keywords = eval(input(msg).split(','))
-        title = eval(input("Title: "))
+        keywords = input(msg).split(',')
+        title = input("Title: ")
         #privacy = eval(input("Privacy (numeric): "))
         #privacy = int(privacy)
         print("Content: ('.' as first charcter of line, to end)")
         content = ""
         while True:
-            c = eval(input("> ").rstrip('\n'))
+            c = input("> ").rstrip('\n')
             if c and c[0] == '.':
                 break
             else:
