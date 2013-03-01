@@ -186,6 +186,7 @@ elif args.action == "find":
     else:
         found = nb.find(keywords='?'.split(','), mode=args.mode, strict=args.strict)
     count = 0
+    nfound = len(found)
     for f in found:
         #print(f)
         try:
@@ -215,7 +216,7 @@ elif args.action == "find":
         elif args.mode == "json":
             print(f['json'])
         else:
-            if args.pretty == "oneline":
+            if args.pretty == "oneline" and nfound > 1:
                 print("<%s> " %f ['noteId'], end="")
                 print("[", " ] [ ".join(f['keywords'][i] for i in range(len(f['keywords']))), "]",end='')
                 print(" : %s" % f['title'])
