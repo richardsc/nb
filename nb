@@ -215,40 +215,45 @@ elif args.action == "find":
         elif args.mode == "json":
             print(f['json'])
         else:
-            print("%s" % f['title'])
-            print("   <%s> " % f['noteId'], end='')
-            print("[", " ] [ ".join(f['keywords'][i] for i in range(len(f['keywords']))), "]",end='')
-            if f['due'] and len(f['due']) > 0:
-                due = datetime.datetime.strptime(f['due'], '%Y-%m-%d %H:%M:%S.%f') # FIXME: make this 'due' DRY (+-20 lines)
-                #print " (due %s)" % f['due']
-                #print "due:", due
-                now = datetime.datetime.now()
-                #print "now:", now
-                when = abs(due - now).total_seconds()
-                #print "when:", when
-                if due > now:
-                    if when < 2 * 3600:
-                        print("(due in %d minutes)" % (when / 60))
-                    elif when < 86400:
-                        print("(due in %d hours)" % (when / 3600))
-                    else:
-                        print("(due in %d days)" % (when / 3600 / 24))
-                else:
-                    if when < 2 * 3600:
-                        print("(overdue by %d minutes)" % (when / 60))
-                    elif when < 86400:
-                        print("(overdue by %d hours)" % (when / 3600))
-                    else:
-                        print("(overdue by %.1f days)" % (when / 3600 / 24))
+            if args.pretty == "oneline":
+                print("<%s> " %f ['noteId'], end="")
+                print("[", " ] [ ".join(f['keywords'][i] for i in range(len(f['keywords']))), "]",end='')
+                print(": %s" % f['title'])
             else:
-                print('')
-            content = f['content'].replace('\\n', '\n')
-            if not args.pretty == "twoline":
-                for contentLine in content.split('\n'):
-                    c = contentLine.rstrip('\n')
-                    if len(c):
-                        print("  ", contentLine.rstrip('\n'))
-                print('')
+                print("%s" % f['title'])
+                print("   <%s> " % f['noteId'], end='')
+                print("[", " ] [ ".join(f['keywords'][i] for i in range(len(f['keywords']))), "]",end='')
+                if f['due'] and len(f['due']) > 0:
+                    due = datetime.datetime.strptime(f['due'], '%Y-%m-%d %H:%M:%S.%f') # FIXME: make this 'due' DRY (+-20 lines)
+                    #print " (due %s)" % f['due']
+                    #print "due:", due
+                    now = datetime.datetime.now()
+                    #print "now:", now
+                    when = abs(due - now).total_seconds()
+                    #print "when:", when
+                    if due > now:
+                        if when < 2 * 3600:
+                            print("(due in %d minutes)" % (when / 60))
+                        elif when < 86400:
+                            print("(due in %d hours)" % (when / 3600))
+                        else:
+                            print("(due in %d days)" % (when / 3600 / 24))
+                    else:
+                        if when < 2 * 3600:
+                            print("(overdue by %d minutes)" % (when / 60))
+                        elif when < 86400:
+                            print("(overdue by %d hours)" % (when / 3600))
+                        else:
+                            print("(overdue by %.1f days)" % (when / 3600 / 24))
+                else:
+                    print('')
+                content = f['content'].replace('\\n', '\n')
+                if not args.pretty == "twoline":
+                    for contentLine in content.split('\n'):
+                        c = contentLine.rstrip('\n')
+                        if len(c):
+                            print("  ", contentLine.rstrip('\n'))
+                    print('')
     if args.count:
         print(count)
 elif args.action == "delete":
