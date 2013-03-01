@@ -90,20 +90,35 @@ Important: this will erase an existing database.
 
 This may be done one at a time, with commandline arguments, e.g.
 
-    ./nb add --keywords 'lecture,physics,MIT' --title="Walter Lewin physics lectures" --content="http://ocw.mit.edu/courses/physics/8-01-physics-i-classical-mechanics-fall-1999/index.htm"
+    nb add --keywords 'lecture,physics,MIT' --title="Walter Lewin physics lectures" --content="http://ocw.mit.edu/courses/physics/8-01-physics-i-classical-mechanics-fall-1999/index.htm"
 
 Another method is with an editor-based supply of the information, which is done
 unless ``--keywords``, ``--title``, and ``--content`` are all given, e.g.
 
-    ./nb add
+    nb add
 
 or
 
-    ./nb add --title "a new note"
+    nb add --title "a new note"
 
 One or more notes can also be added through input of a JSON file, e.g.
 
-    ./nb add --mode json --file note.json
+    nb add --mode json --file note.json
+
+
+### Edit notes
+
+To edit a note, you must know its ID, which is given between the ``<`` and the
+``>`` in the output from ``nb find``.  For example, to edit note number 1, do
+as follows.
+
+    nb edit --id 4
+
+This will open up the text editor you have specified in your ``EDITOR``
+environment variable, or the ``vim`` editor if you have not specified this
+variable.  Just follow the instructions and close the editor, and a new note
+will have been created, with the note having been deleted.
+
 
 ### Find notes
 
