@@ -218,7 +218,7 @@ elif args.action == "find":
             if args.pretty == "oneline":
                 print("<%s> " %f ['noteId'], end="")
                 print("[", " ] [ ".join(f['keywords'][i] for i in range(len(f['keywords']))), "]",end='')
-                print(": %s" % f['title'])
+                print(" : %s" % f['title'])
             else:
                 print("%s" % f['title'])
                 print("   <%s> " % f['noteId'], end='')
