@@ -24,8 +24,6 @@ import os
 import re
 import datetime
 from time import strptime
-import tempfile
-from subprocess import call
 
 
 # look in ~/.nbrc to see if a database is named there
@@ -160,54 +158,13 @@ if args.action == "add":
     elif args.mode == 'interactive' and (args.title == "" or args.content == "" or args.keywords == ""):
         if args.debug:
             print("should handle interactive now")
-        initial_message = '''Instructions: fill in material following the ">" symbol.  The title should fit
-on one line.  The keywords should also be on one line, separated by commas.
-The content should start on the indicated line, but may may span any number of
-further lines.
-
-TITLE> %s
-
-KEYWORDS> %s
-
-CONTENT> %s
-''' % (args.title, ",".join(k for k in args.keywords), args.content)
-        try:
-            tempfile = tempfile.NamedTemporaryFile(suffix=".tmp") #, delete=False)
-        except:
-            print('cannot create tempfile')
-        tempfile.write(initial_message)
-        tempfile.flush()
-        #print("tempfile.name: '%s'" % tempfile.name)
-        EDITOR = os.environ.get('EDITOR','vi') 
-        #print(EDITOR)
-        try:
-            call([EDITOR, tempfile.name])
-        except:
-            try:
-                os.system(EDITOR + ' ' + tempfile.name)
-            except:
-                print("cannot spawn an editor")
-                sys.exit(1)
-        lines = open(tempfile.name).readlines()
-        inContent = False
-        for line in lines:
-            line = line.rstrip('\n')
-            if inContent:
-                content = content + line + '\n'
-            elif "TITLE" in line:
-                title = re.sub(r'.*>', '', line).strip()
-            elif "KEYWORDS" in line:
-                keywords = re.sub(r'.*>', '', line).strip()
-            elif "CONTENT" in line or inContent:
-                inContent = True
-                line = re.sub(r'.*>', '', line).rstrip('\n')
-                content = content + line + '\n'
-        content = content.rstrip('\n')
-        keywords = keywords.split(',')
         if args.debug:
-            print( "TITLE '%s'" % title)
-            print( "KEYWORDS '%s'" % keywords)
-            print( "CONTENT '%s'" % content)
+             print( "TITLE '%s'" % title)
+             print( "KEYWORDS '%s'" % keywords)
+             print( "CONTENT '%s'" % content)
+        entry = nb.editor_entry(title=args.title, keywords=args.keywords, content=args.content, privacy=args.privacy, due=args.due)
+        id = nb.add(title=entry["title"], keywords=entry["keywords"], content=entry["content"], privacy=entry["privacy"], due=entry["due"])
+
         #keywords = nb.cur.execute("SELECT keywordId, keyword FROM keyword ORDER BY UPPER(keyword);")
         #msg = "Keywords (perhaps one of following) " + ",".join(str(kw[1]) for kw in keywords) + ": "
         #keywords = input(msg).split(',')
@@ -221,11 +178,10 @@ CONTENT> %s
         #    else:
         #        content = content + c + '\n'
         #content.rstrip('\n')
-        id = nb.add(title=title, keywords=keywords, content=content)
+        ### id = nb.add(title=title, keywords=keywords, content=content)
     else:
-        id = nb.add(title=args.title, keywords=args.keywords, content=args.content, due=args.due, privacy=args.privacy)
-
-if args.action == "find":
+        id = nb.add(title=args.title, keywords=args.keywords, content=args.content, privacy=args.privacy, due=args.due)
+elif args.action == "find":
     due_requested = nb.interpret_time(args.due)
     #print("due_requested:", due_requested)
     if args.keywords[0] != '':
@@ -290,7 +246,9 @@ if args.action == "find":
                 print('')
             content = f['content'].replace('\\n', '\n')
             for contentLine in content.split('\n'):
-                print("  ", contentLine.rstrip('\n'))
+                c = contentLine.rstrip('\n')
+                if len(c):
+                    print("  ", contentLine.rstrip('\n'))
             print('')
     if args.count:
         print(count)

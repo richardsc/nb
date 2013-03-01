@@ -7,6 +7,8 @@ import os.path
 import json
 import difflib
 import re
+import tempfile
+from subprocess import call
 
 class Nb:
     def __init__(self, db="nb.db", authorId=1, debug=0):
@@ -244,3 +246,59 @@ class Nb:
             print("due '%s'; tolerance '%s'" % (due[0], due[1]))
         return due
 
+
+    def editor_entry(self, title, keywords, content, privacy=0, due=""):
+        initial_message = '''Instructions: fill in material following the ">" symbol.  (Items following the
+"?>" symbol are optional.  The title and keywords must each fit on one line.
+Use commas to separate keywords.  The content should start on the indicated
+line, but may may span any number of further lines.
+
+TITLE> %s
+
+KEYWORDS> %s
+
+PRIVACY> %s
+
+DUE?> %s
+
+CONTENT> %s
+''' % (title, ",".join(k for k in keywords), content, privacy, due)
+        try:
+            file = tempfile.NamedTemporaryFile(suffix=".tmp") #, delete=False)
+        except:
+            print('cannot create tempfile')
+        file.write(initial_message)
+        file.flush()
+        #print("tempfile.name: '%s'" % tempfile.name)
+        EDITOR = os.environ.get('EDITOR','vi') 
+        #print(EDITOR)
+        try:
+            call([EDITOR, file.name])
+        except:
+            try:
+                os.system(EDITOR + ' ' + file.name)
+            except:
+                print("cannot spawn an editor")
+                sys.exit(1)
+        lines = open(file.name).readlines()
+        inContent = False
+        for line in lines:
+            line = line.rstrip('\n')
+            if inContent:
+                content = content + line + '\n'
+            elif "TITLE" in line:
+                title = re.sub(r'.*>', '', line).strip()
+            elif "DUE" in line:
+                due = re.sub(r'.*>', '', line).strip()
+            elif "PRIVACY" in line:
+                PRIVACY = re.sub(r'.*>', '', line).strip()
+            elif "KEYWORDS" in line:
+                keywords = re.sub(r'.*>', '', line).strip()
+            elif "CONTENT" in line or inContent:
+                inContent = True
+                line = re.sub(r'.*>', '', line).rstrip('\n')
+                content = content + line + '\n'
+        content = content.rstrip('\n')
+        keywords = keywords.split(',')
+        return {"title":title, "keywords":keywords, "content":content, "privacy":privacy, "due":due}
+ 
