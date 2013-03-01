@@ -187,15 +187,18 @@ elif args.action == "find":
         if due_requested[0]:
             if not due:
                 continue
-            #print("due (%s)" % due_requested[0])
+            if args.debug:
+                print("due_requested: %s" % due_requested[0])
             due = datetime.datetime.strptime(due, '%Y-%m-%d %H:%M:%S.%f')
-            #print("due:", due)
+            if args.debug:
+                print("due value stored in note:", due)
             if due > due_requested[0]:
                 when = (due - due_requested[0]).total_seconds()
             else:
                 when = (due_requested[0]- due).total_seconds()
-            #print('when:', when)
-            if when > due_requested[1]:
+            if args.debug:
+                print('when:', when)
+            if when < 0:
                 continue
         count += 1
         if args.count:
@@ -227,7 +230,7 @@ elif args.action == "find":
                     elif when < 86400:
                         print("(overdue by %d hours)" % (when / 3600))
                     else:
-                        print("(overdue by %d days)" % (when / 3600 / 24))
+                        print("(overdue by %.1f days)" % (when / 3600 / 24))
             else:
                 print('')
             content = f['content'].replace('\\n', '\n')
