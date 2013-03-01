@@ -220,7 +220,4 @@ ball rolling, below is a list of topics that are likely to come up:
 functionality is settled.  Also, it will likely be web-based because then it
 will work on all platforms.
 
-* There should be an interface to a text editor, both for adding items and
-  editing them.  (Suggestion of @richardsc)
-
 * ... your item here :-)
