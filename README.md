@@ -69,6 +69,7 @@ following lines, adjusted for the directory name
 
     alias nb=/Users/kelley/src/nb/nb
 
+
 ### Specifying a database file
 
 The default database file is ``~/Dropbox/nb.db``, but this may not suit all
@@ -79,11 +80,11 @@ for example it might contain the following.
 
     db = "~/Dropbox/nb.db"
 
+
 ### Create a database
 
-    nb RESET
-
-Important: this will erase an existing database.
+When ``nb`` is first used, it will create a database with a name as described
+in the previous section.
 
 
 ### Add notes
@@ -106,7 +107,7 @@ One or more notes can also be added through input of a JSON file, e.g.
     nb add --mode json --file note.json
 
 
-### Edit notes
+### Edit a note
 
 To edit a note, you must know its ID, which is given between the ``<`` and the
 ``>`` in the output from ``nb find``.  For example, to edit note number 1, do
@@ -165,6 +166,7 @@ to extract the note with the stated ID, or e.g.
 
 to extract notes with keyword "arctic".
 
+
 ## Import notes
 
 An individual note (e.g. a chunk of information from the ``note_1.txt`` file
@@ -177,11 +179,13 @@ to colleagues, so they can import them into their own databases.
 
 Bug: this only works for *single* notes, at the present time.
 
+
 ### Dump database
 
 Advanced users may want to dump the whole database with
 
     echo ".dump" | sqlite3 nb.db
+
 
 ### Back up the database
 
@@ -193,6 +197,7 @@ database daily (adjust the filenames appropriately).
 (This could be done better by checking the sha value of the file, to only
 backup when things have changed.)
 
+
 ### Task count in bash prompt
 
 To get a list of notes that are due today, put the following in your ``~/.bash_profile`` file:
@@ -202,7 +207,6 @@ To get a list of notes that are due today, put the following in your ``~/.bash_p
     }
     PS1="\h:\W"
     export PS1="$PS1<\$(nb_count)> "
-
 
 
 ## Discussion items
