@@ -81,7 +81,7 @@ for example it might contain the following.
 
 ### Create a database
 
-    ./nb RESET
+    nb RESET
 
 Important: this will erase an existing database.
 
@@ -124,7 +124,7 @@ will have been created, with the note having been deleted.
 
 At present, the only way to find notes is by searching for a keyword, e.g.
 
-    ./nb find --keyword "lecture"
+    nb find --keyword "lecture"
 
 Note that the search is fuzzy, so that e.g. "leture" would get the same results
 as "lecture".  However, this scheme can have surprising results, so the
@@ -132,26 +132,33 @@ as "lecture".  However, this scheme can have surprising results, so the
 
 To get all the notes, use
 
-    ./nb find
+    nb find
 
 To find a note with a given ID, use e.g.
 
-    ./nb find --id 1
+    nb find --id 1
 
+The format of notes can be controlled with the argument ``--pretty``, which may
+be either ``standard`` or ``twoline``.  A default value for this may be set in
+the ``~/.nbrc`` file, e.g. it might contain
+
+    pretty = "twoline"
+
+    
 
 ### Export notes
 
 Notes may be exported to a JSON file by e.g.
 
-    ./nb find --mode json > notes.json
+    nb find --mode json > notes.json
 
 or probably more usefully, in plain format by e.g.
 
-    ./nb find --id 1 > note_1.txt
+    nb find --id 1 > note_1.txt
 
 to extract the note with the stated ID, or e.g.
 
-    ./nb find --key arctic > note_arctic.txt
+    nb find --key arctic > note_arctic.txt
 
 to extract notes with keyword "arctic".
 
@@ -160,7 +167,7 @@ to extract notes with keyword "arctic".
 An individual note (e.g. a chunk of information from the ``note_1.txt`` file
 created immediately above) can be imported by e.g.
 
-    ./nb add --mode plain < note_1.txt
+    nb add --mode plain < note_1.txt
 
 This, combined with the export mechanism, provides an easy way to email notes
 to colleagues, so they can import them into their own databases.

@@ -25,19 +25,22 @@ import re
 import datetime
 from time import strptime
 
-
-# look in ~/.nbrc to see if a database is named there
-defaultDatabase = "~/Dropbox/nb.db"
-try:
-    with open(os.path.expanduser("~/.nbrc"), "r") as f:
-        tokens = f.readline().split("=")
-        tokens[0] = tokens[0].strip()
-        tokens[1] = tokens[1].strip()
-        tokens[1] = tokens[1].strip('"')
-        if tokens[0] == "db":
-            defaultDatabase = tokens[1] # over-ride
-except:
-    pass
+def get_from_dotfile(file, token, default=""):
+    try:
+        with open(os.path.expanduser(file), "r") as f:
+            for line in f.readlines():
+                line = re.sub(r'#.*', r'', line)
+                tokens = line.split("=")
+                tokens = line.split("=")
+                tokens[0] = tokens[0].strip()
+                tokens[1] = tokens[1].strip()
+                tokens[1] = tokens[1].strip('"')
+                if tokens[0] == token:
+                    return(tokens[1])
+            return(default)
+    except:
+        print("cannot open file '%s'" % file)
+        sys.exit(1)
 
 parser = argparse.ArgumentParser()
 parser.add_argument('action', choices=['add', 'find', 'edit', 'delete', 'version', 'RESET', 'cleanup'])
@@ -51,12 +54,18 @@ parser.add_argument("--count", action="store_true", dest="count", default=False,
 parser.add_argument('-d', "--debug", action="store_true", dest="debug", default=False, help="set debugging on")
 parser.add_argument('-p', "--privacy", type=int, default=0, help="set privacy level (0=open, 1=closed)")
 parser.add_argument("--file", type=str, help="filename for input (add) or output (find)")
+defaultDatabase = get_from_dotfile("~/.nbrc", "db", "~/Dropbox/nb.db")
 parser.add_argument("--db", type=str, default=defaultDatabase, help="filename for database")
 parser.add_argument("--strict", action="store_true", default=False, help="use strict search?")
 parser.add_argument("--due", type=str, default="", help="time when item is due [not used yet]")
+parser.add_argument("--pretty", type=str, default="", help="format for note output")
 args = parser.parse_args()
 
 args.keywords = args.keywords.split(',')
+
+# look in ~/.nbrc to see if a database is named there
+if not args.pretty:
+    args.pretty = get_from_dotfile("~/.nbrc", "pretty", "standard")
 
 nb = Nb(debug=args.debug, db=args.db)
 
@@ -234,11 +243,12 @@ elif args.action == "find":
             else:
                 print('')
             content = f['content'].replace('\\n', '\n')
-            for contentLine in content.split('\n'):
-                c = contentLine.rstrip('\n')
-                if len(c):
-                    print("  ", contentLine.rstrip('\n'))
-            print('')
+            if not args.pretty == "twoline":
+                for contentLine in content.split('\n'):
+                    c = contentLine.rstrip('\n')
+                    if len(c):
+                        print("  ", contentLine.rstrip('\n'))
+                print('')
     if args.count:
         print(count)
 elif args.action == "delete":
