@@ -167,7 +167,7 @@ to extract the note with the stated ID, or e.g.
 to extract notes with keyword "arctic".
 
 
-## Import notes
+### Import notes
 
 An individual note (e.g. a chunk of information from the ``note_1.txt`` file
 created immediately above) can be imported by e.g.
