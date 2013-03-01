@@ -140,7 +140,14 @@ class Nb:
     def edit(self, id=-1):
         if id < 0:
             print("cannot delete a note with a negative id number (%s)" % id)
-        print("BUG: 'nb edit --id %d' does not work yet" % id)# FIXME: use similar to 'add'
+        n = self.cur.execute("SELECT title,content,privacy,due FROM note WHERE noteId = ?;", [id])
+        note = n.fetchone()
+        keywords = []
+        keywords.extend(self.get_keywords(id))
+        ee = self.editor_entry(title=note[0], keywords=keywords, content=note[1], privacy=note[2], due=note[3])
+        idnew = self.add(title=ee["title"], keywords=ee["keywords"], content=ee["content"], privacy=ee["privacy"], due=ee["due"])
+        self.delete(id)
+        return idnew
 
     def cleanup(self):
         ''' Clean up the database, e.g. removing unused keywords.'''
@@ -218,6 +225,18 @@ class Nb:
                 print("There is no note numbered %d." % n[0])
         return rval
 
+    def get_keywords(self, id):
+        if id < 0:
+            print("Cannot have a negative note ID")
+            return None
+        keywordIds = []
+        keywordIds.extend(self.con.execute("SELECT keywordid FROM notekeyword WHERE notekeyword.noteid = ?;", [id]))
+        keywords = []
+        for k in keywordIds:
+            keywords.append(self.cur.execute("SELECT keyword FROM keyword WHERE keywordId = ?;", k).fetchone()[0])
+        return keywords
+ 
+
     def interpret_time(self, due):
         # catch "tomorrow" and "Nhours", "Ndays", "Nweeks" (with N an integer)
         now = datetime.datetime.now()
@@ -250,8 +269,8 @@ class Nb:
     def editor_entry(self, title, keywords, content, privacy=0, due=""):
         initial_message = '''Instructions: fill in material following the ">" symbol.  (Items following the
 "?>" symbol are optional.  The title and keywords must each fit on one line.
-Use commas to separate keywords.  The content should start on the indicated
-line, but may may span any number of further lines.
+Use commas to separate keywords.  The content must start *below* the line
+with that title.
 
 TITLE> %s
 
@@ -261,8 +280,10 @@ PRIVACY> %s
 
 DUE?> %s
 
-CONTENT> %s
-''' % (title, ",".join(k for k in keywords), content, privacy, due)
+CONTENT...
+
+%s
+''' % (title, ",".join(k for k in keywords), privacy, due, content)
         try:
             file = tempfile.NamedTemporaryFile(suffix=".tmp") #, delete=False)
         except:
@@ -282,6 +303,7 @@ CONTENT> %s
                 sys.exit(1)
         lines = open(file.name).readlines()
         inContent = False
+        content = ""
         for line in lines:
             line = line.rstrip('\n')
             if inContent:
@@ -294,10 +316,8 @@ CONTENT> %s
                 PRIVACY = re.sub(r'.*>', '', line).strip()
             elif "KEYWORDS" in line:
                 keywords = re.sub(r'.*>', '', line).strip()
-            elif "CONTENT" in line or inContent:
+            elif "CONTENT" in line:
                 inContent = True
-                line = re.sub(r'.*>', '', line).rstrip('\n')
-                content = content + line + '\n'
         content = content.rstrip('\n')
         keywords = keywords.split(',')
         return {"title":title, "keywords":keywords, "content":content, "privacy":privacy, "due":due}
