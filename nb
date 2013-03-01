@@ -52,20 +52,20 @@ parser.add_argument("-k", "--keywords", type=str, default="", help="comma-separa
 parser.add_argument('-c', "--content", type=str, default="", help="content")
 parser.add_argument("--count", action="store_true", dest="count", default=False, help="report only count of found results")
 parser.add_argument('-d', "--debug", action="store_true", dest="debug", default=False, help="set debugging on")
-parser.add_argument('-p', "--privacy", type=int, default=0, help="set privacy level (0=open, 1=closed)")
+parser.add_argument("--privacy", type=int, default=0, help="set privacy level (0=open, 1=closed)")
 parser.add_argument("--file", type=str, help="filename for input (add) or output (find)")
 defaultDatabase = get_from_dotfile("~/.nbrc", "db", "~/Dropbox/nb.db")
 parser.add_argument("--db", type=str, default=defaultDatabase, help="filename for database")
 parser.add_argument("--strict", action="store_true", default=False, help="use strict search?")
 parser.add_argument("--due", type=str, default="", help="time when item is due [not used yet]")
-parser.add_argument("--pretty", type=str, default="", help="format for note output")
+parser.add_argument('-p', "--pretty", type=str, default="", help="format for note output")
 args = parser.parse_args()
 
 args.keywords = args.keywords.split(',')
 
 # look in ~/.nbrc to see if a database is named there
 if not args.pretty:
-    args.pretty = get_from_dotfile("~/.nbrc", "pretty", "standard")
+    args.pretty = get_from_dotfile("~/.nbrc", "pretty", "all")
 
 nb = Nb(debug=args.debug, db=args.db)
 

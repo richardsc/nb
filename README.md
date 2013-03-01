@@ -138,9 +138,9 @@ To find a note with a given ID, use e.g.
 
     nb find --id 1
 
-The format of notes can be controlled with the argument ``--pretty``, which may
-be either ``standard`` or ``twoline``.  A default value for this may be set in
-the ``~/.nbrc`` file, e.g. it might contain
+The format of notes can be controlled with the argument ``--pretty``
+(abbreviated ``-p``), which may be either ``all`` or ``twoline``.  A default
+value for this may be set in the ``~/.nbrc`` file, e.g. it might contain
 
     pretty = "twoline"
 
