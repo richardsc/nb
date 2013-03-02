@@ -110,7 +110,7 @@ One or more notes can also be added through input of a JSON file, e.g.
 ### Edit a note
 
 To edit a note, you must know its ID, which is given between the ``<`` and the
-``>`` in the output from ``nb find``.  For example, to edit note number 1, do
+``>`` in the output from ``nb find``.  For example, to edit note number 4, do
 as follows.
 
     nb edit --id 4
@@ -212,12 +212,13 @@ To get a list of notes that are due today, put the following in your ``~/.bash_p
 ## Discussion items
 
 The author would like advice on any bugs that users find, or any features that
-they might like to see.  Almost any advice is likely to be helpful.  To get the
-ball rolling, below is a list of topics that are likely to come up:
+they might like to see.  Almost any advice is likely to be helpful.  Please use
+the [issues link](https://github.com/dankelley/nb/issues) to contribute.  A few
+prominent ideas will be added below.
 
-* There should be a graphical interface.  This is a lot of work, and will not
-  be of too much use to power users, so it will come only after the general
-functionality is settled.  Also, it will likely be web-based because then it
-will work on all platforms.
+* There could be a graphical interface to supplement the command line
+  interface.  However, constructing the graphical interface is arduous, so this
+is not a high priority.
 
 * ... your item here :-)
+
