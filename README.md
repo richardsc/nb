@@ -213,12 +213,32 @@ To get a list of notes that are due today, put the following in your ``~/.bash_p
 
 The author would like advice on any bugs that users find, or any features that
 they might like to see.  Almost any advice is likely to be helpful.  Please use
-the [issues link](https://github.com/dankelley/nb/issues) to contribute.  A few
-prominent ideas will be added below.
+the [issues link](https://github.com/dankelley/nb/issues) to contribute.  
+
+In making suggestions, please bear in mind that whole idea of ``nb``
+development is to provide tools that people need in practice, as opposed to
+tools that might appear to be useful in theory.  This is not a coding exercise;
+it is a way to get things done.
+
+As ideas gell on the [issues link](https://github.com/dankelley/nb/issues),
+they will be added below, with some discussion notes.
+
+* It would be helpful to search in more general ways, e.g. within titles and
+  content, or by date.  Such things may be added when power users report that
+they need them in their work.  At the moment, one addition is fairly clear:
+``nb`` should handle simple boolean operations on keyword searches.  The most
+useful operation may be logical "and", e.g. ``-k python,book`` could find books
+about Python.  A related addition is, of course, logical "or", e.g. ``-k
+python/ruby`` might find items about either Python or Ruby.  The "and"
+operation seems most useful to those presently using ``nb``, so it will be
+coded first.  It is unlikely that considerable work of adding general parsing
+of complex logical expressions will pay off in any significant way, so that is
+a low-priorty item.
 
 * There could be a graphical interface to supplement the command line
   interface.  However, constructing the graphical interface is arduous, so this
 is not a high priority.
+
 
 * ... your item here :-)
 
