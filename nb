@@ -25,6 +25,7 @@ import re
 import datetime
 from time import strptime
 
+
 def get_from_dotfile(file, token, default=""):
     try:
         with open(os.path.expanduser(file), "r") as f:
@@ -39,11 +40,10 @@ def get_from_dotfile(file, token, default=""):
                     return(tokens[1])
             return(default)
     except:
-        print("cannot open file '%s'" % file)
-        sys.exit(1)
+        error("cannot open file '%s'" % file, file=sys.stderr)
 
 parser = argparse.ArgumentParser()
-parser.add_argument('action', choices=['add', 'find', 'edit', 'delete', 'version', 'RESET', 'cleanup'])
+parser.add_argument('action', choices=['add', 'find', 'edit', 'delete', 'todo', 'version', 'RESET', 'cleanup'])
 parser.add_argument('-i', '--id', type=int, help="ID number of note to delete")
 parser.add_argument('-m', '--mode', type=str, default="interactive", choices=['interactive', 'plain', 'json'],
         help="method for i/o")
@@ -67,7 +67,7 @@ args.keywords = args.keywords.split(',')
 if not args.pretty:
     args.pretty = get_from_dotfile("~/.nbrc", "pretty", "all")
 
-nb = Nb(debug=args.debug, db=args.db)
+nb = Nb(debug=args.debug, db=args.db, quiet=args.count)
 
 if args.file:
     file = args.file
@@ -76,13 +76,13 @@ else:
 
 if args.title:
     if args.action != "add":
-        print("warning: --title is ignored unless --action!='add'")
+        nb.warning("--title is ignored unless --action!='add'")
     title = args.title
 else:
     title = ""
 if args.content:
     if args.action != "add":
-        print("warning: --content is ignored unless --action='add'")
+        nb.warning("--content is ignored unless --action='add'")
     content = args.content
 else:
     content = ""
@@ -222,8 +222,10 @@ elif args.action == "find":
                 print(" : %s" % f['title'])
             else:
                 print("%s" % f['title'])
-                print("   <%s> " % f['noteId'], end='')
-                print("[", " ] [ ".join(f['keywords'][i] for i in range(len(f['keywords']))), "]",end='')
+                print("  ", "[", " ] [ ".join(f['keywords'][i] for i in range(len(f['keywords']))), "]",end='')
+                print(" <%s>" % f['noteId'], end='')
+                print(" {%s / %s} " % (f['date'], f['modified']), end="")
+                #print(" {%s} " % f['date'], end="")
                 if f['due'] and len(f['due']) > 0:
                     due = datetime.datetime.strptime(f['due'], '%Y-%m-%d %H:%M:%S.%f') # FIXME: make this 'due' DRY (+-20 lines)
                     #print " (due %s)" % f['due']
@@ -276,5 +278,8 @@ elif args.action == "RESET":
 elif args.action == "cleanup":
     nb.cleanup()
 elif args.action == "version":
-    nb.version()
+    print(nb.version())
+elif args.action == "todo":
+    print('todo', file=sys.stderr)
+
 

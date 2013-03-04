@@ -11,7 +11,7 @@ import tempfile
 from subprocess import call
 
 class Nb:
-    def __init__(self, db="nb.db", authorId=1, debug=0):
+    def __init__(self, db="nb.db", authorId=1, debug=0, quiet=False):
         '''
 
         A class used for the storing and searching of textual notes in a
@@ -19,24 +19,26 @@ class Nb:
         convenient way to search later.
 
         '''
+        self.debug = debug 
+        self.quiet = quiet
         if debug:
-            print("Working with database named '%s' (before path expansion)." % db)
+            self.fyi("Working with database named '%s' (before path expansion)." % db)
         db = os.path.expanduser(db)
         if debug:
-            print("Working with database named '%s' (after path expansion)." % db)
+            self.fyi("Working with database named '%s' (after path expansion)." % db)
         mustInitialize = not os.path.exists(db)
         if mustInitialize:
-            print("Warning: there is no database named '%s', so one is being created" % db)
+            self.fyi("Warning: there is no database named '%s', so one is being created" % db)
         try:
             con = sqlite.connect(db)
         except:
-            print("Error opening connection to database named '%s'" % db)
+            self.error("Error opening connection to database named '%s'" % db)
             sys.exit(1)
         self.con = con
         self.cur = con.cursor()
         self.authorId = authorId
-        self.debug = debug 
-        self.appversion = [0, 2]
+        ## 0.3: add note.modified column
+        self.appversion = [0, 3]
         self.dbversion = self.appversion
         if mustInitialize:
             self.initialize()
@@ -44,35 +46,58 @@ class Nb:
             v = self.cur.execute("SELECT major,minor FROM version;").fetchone()
             self.dbversion = v
         except:
-            print("cannot get version number in database")
+            self.warning("cannot get version number in database")
             self.dbversion = [0, 0] # started storing version at [0, 1]
             pass
-        appversion = 10*self.appversion[0] + self.appversion[1]
-        dbversion = 10*self.dbversion[0] + self.dbversion[1]
+        appversion = int(10*self.appversion[0] + self.appversion[1])
+        dbversion = int(10*self.dbversion[0] + self.dbversion[1])
         if debug:
-            print("appversion: %d.%d" % (self.appversion[0], self.appversion[1]))
-            print("dbversion: %d.%d" % (self.dbversion[0], self.dbversion[1]))
-        if appversion > dbversion: # FIXME: this only works for versions 0.1 and 0.2
-            print("Updating the database from version %d.%d to %d.%d" % (self.dbversion[0], self.dbversion[1], self.appversion[0], self.appversion[1]))
-            try:
-                self.cur.execute('ALTER TABLE note ADD due DEFAULT "";')
-                print("Adding a column named 'due' to the database table named 'note'.")
-            except:
-                print("Problem adding the 'due' column to the table 'note'")
-            self.con.commit()
+            print("appversion: %d.%d (which translates to %d)" % (self.appversion[0], self.appversion[1], appversion))
+            print("dbversion: %d.%d (which translates to %d)" % (self.dbversion[0], self.dbversion[1], dbversion))
+        if appversion > dbversion:
+            if dbversion < 2:
+                self.fyi("Updating the database from version %d.%d to 0.2" % (self.dbversion[0], self.dbversion[1]))
+                try:
+                    self.cur.execute('ALTER TABLE note ADD due DEFAULT "";')
+                    self.fyi("Adding a column named 'due' to the database table named 'note'.")
+                except:
+                    self.error("Problem adding a column named 'due' to the table 'note'")
+                self.con.commit()
+            if dbversion < 3:
+                self.fyi("Updating the database from version %d.%d to 0.3" % (self.dbversion[0], self.dbversion[1]))
+                try:
+                    self.cur.execute('ALTER TABLE note ADD modified DEFAULT "";')
+                    self.cur.execute('UPDATE note SET modified = date;')
+                    self.fyi("Added a column named 'modified' to the database table named 'note'.")
+                except:
+                    self.error("Problem adding a column named 'modified' to the table named 'note'")
+                self.con.commit()
             try:
                 self.cur.execute("DELETE FROM version;")
                 self.cur.execute("INSERT INTO version(major, minor) VALUES (?,?);",
                         (self.appversion[0], self.appversion[1]))
-                print("Updating the database table 'version' to value", self.appversion)
+                self.con.commit()
+                self.fyi("Updated the database to version %d.%d" % (self.appversion[0], self.appversion[1]))
             except:
-                print("Problem updating database version to %d.%d" % (self.appversion[0], self.appversion[1]))
-            self.con.commit()
+                self.error("Problem updating database version to %d.%d" % (self.appversion[0], self.appversion[1]))
 
 
+    def fyi(self, msg, prefix="FYI: "):
+        if not self.quiet:
+            print(prefix + msg, file=sys.stderr)
+
+
+    def warning(self, msg, prefix="Warning: "):
+        if not self.quiet:
+            print(prefix + msg, file=sys.stderr)
+
+    def error(self, msg, level=1, prefix="Error: "):
+        if not self.quiet:
+            print(prefix + msg, file=sys.stderr)
+        sys.exit(level)
 
     def version(self):
-        print("Application version %d.%d; database version %d.%d" % (self.appversion[0], self.appversion[1], self.dbversion[0], self.dbversion[1]))
+        return("Application version %d.%d; database version %d.%d" % (self.appversion[0], self.appversion[1], self.dbversion[0], self.dbversion[1]))
 
     def initialize(self, author=""):
         ''' Initialize the database.  This is dangerous since it removes any
@@ -80,14 +105,14 @@ class Nb:
         self.cur.execute("CREATE TABLE version(major, minor);")
         self.cur.execute("INSERT INTO version(major, minor) VALUES (?,?);",
                 (self.appversion[0], self.appversion[1]))
-        self.cur.execute("CREATE TABLE note(noteId integer primary key autoincrement, authorId, date, title, content, privacy DEFAULT 0);")
+        self.cur.execute("CREATE TABLE note(noteId integer primary key autoincrement, authorId, date, modified, title, content, privacy DEFAULT 0);")
         self.cur.execute("CREATE TABLE author(authorId integer primary key autoincrement, name, nickname);")
         self.cur.execute("CREATE TABLE alias(aliasId integer primary key autoincrement, item, alias);")
         self.cur.execute("CREATE TABLE keyword(keywordId integer primary key autoincrement, keyword);")
         self.cur.execute("CREATE TABLE notekeyword(notekeywordId integer primary key autoincrement, noteid, keywordid);")
         self.con.commit()
 
-    def add(self, title="", keywords="", content="", due="", privacy=0):
+    def add(self, title="", keywords="", content="", due="", privacy=0, date="", modified=""):
         ''' Add a note to the database.  The title should be short (perhaps 3
         to 7 words).  The keywords are comma-separated, and should be similar
         in style to others in the database.  The content may be of any length.
@@ -96,9 +121,10 @@ class Nb:
 
         due = self.interpret_time(due)[0]
         now = datetime.datetime.now()
-        date = now.strftime("%Y-%m-%d %H:%M:%S")
-        self.cur.execute("INSERT INTO note(authorId, date, title, content, privacy, due) VALUES(?, ?, ?, ?, ?, ?);",
-                (self.authorId, date, title, content, privacy, due))
+        if date == "":
+            date = now.strftime("%Y-%m-%d %H:%M:%S")
+        self.cur.execute("INSERT INTO note(authorId, date, modified, title, content, privacy, due) VALUES(?, ?, ?, ?, ?, ?, ?);",
+                (self.authorId, date, modified, title, content, privacy, due))
         noteId = self.cur.lastrowid
         for keyword in keywords:
             if self.debug:
@@ -119,34 +145,35 @@ class Nb:
 
     def delete(self, id=-1):
         if id < 0:
-            print("cannot delete a note with a negative id number (%s)" % id)
-            return False
+            self.error("cannot delete a note with a negative id number (%s)" % id)
         if self.debug:
             n = self.cur.execute("SELECT noteId, title FROM note WHERE noteId = ?;", [id])
             print("Deleting the following note:", n.fetchone())
         try:
             self.cur.execute("DELETE FROM note WHERE noteId = ?;", [id])
         except:
-            print("there is no note numbered %d" % id)
+            self.error("there is no note numbered %d" % id)
             return False
         try:
             self.cur.execute("DELETE FROM notekeyword WHERE noteId = ?;", [id])
         except:
-            print("there was a problem deleting keywords associated with note numbered %d" % id)
+            self.error("there was a problem deleting keywords associated with note numbered %d" % id)
         self.cleanup()
         self.con.commit()
         return True
 
     def edit(self, id=-1):
+        # BUG: should update modified
         if id < 0:
-            print("cannot delete a note with a negative id number (%s)" % id)
-        n = self.cur.execute("SELECT title,content,privacy,due FROM note WHERE noteId = ?;", [id])
+            self.warning("cannot delete a note with a negative id number (%s)" % id)
+        n = self.cur.execute("SELECT title,content,privacy,due,date FROM note WHERE noteId = ?;", [id])
         note = n.fetchone()
         keywords = []
         keywords.extend(self.get_keywords(id))
         ee = self.editor_entry(title=note[0], keywords=keywords, content=note[1], privacy=note[2], due=note[3])
-        idnew = self.add(title=ee["title"], keywords=ee["keywords"], content=ee["content"], privacy=ee["privacy"], due=ee["due"])
-        self.delete(id)
+        idnew = self.add(title=ee["title"], keywords=ee["keywords"], content=ee["content"], privacy=ee["privacy"],
+                due=ee["due"], date=note[4], modified=datetime.datetime.now())
+        self.delete(id) # FIXME: should reuse the noteId
         return idnew
 
     def cleanup(self):
@@ -201,9 +228,9 @@ class Nb:
         rval = []
         for n in noteIds:
             try:
-                note = self.cur.execute("SELECT noteId, authorId, date, title, content, due, privacy FROM note WHERE noteId=?;", n).fetchone()
+                note = self.cur.execute("SELECT noteId, authorId, date, title, content, due, privacy, modified FROM note WHERE noteId=?;", n).fetchone()
             except:
-                print("Problem extracting note from database")
+                self.warning("Problem extracting note from database")
                 next
             if note:
                 privacy = note[6]
@@ -220,14 +247,14 @@ class Nb:
                     rval.append({"json":json.dumps(c)})
                 else:
                     rval.append({"noteId":note[0], "title":note[3], "keywords":keywords,
-                        "content":note[4], "due":note[5], "privacy":note[6]})
+                        "content":note[4], "due":note[5], "privacy":note[6], "date":note[2], "modified":note[7]})
             else:
-                print("There is no note numbered %d." % n[0])
+                self.error("There is no note numbered %d" % int(n[0]))
         return rval
 
     def get_keywords(self, id):
         if id < 0:
-            print("Cannot have a negative note ID")
+            self.error("Cannot have a negative note ID")
             return None
         keywordIds = []
         keywordIds.extend(self.con.execute("SELECT keywordid FROM notekeyword WHERE notekeyword.noteid = ?;", [id]))
