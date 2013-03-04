@@ -33,7 +33,6 @@ class Nb:
             con = sqlite.connect(db)
         except:
             self.error("Error opening connection to database named '%s'" % db)
-            sys.exit(1)
         self.con = con
         self.cur = con.cursor()
         self.authorId = authorId
@@ -326,8 +325,7 @@ CONTENT...
             try:
                 os.system(EDITOR + ' ' + file.name)
             except:
-                print("cannot spawn an editor")
-                sys.exit(1)
+                self.error("cannot spawn an editor")
         lines = open(file.name).readlines()
         inContent = False
         content = ""
