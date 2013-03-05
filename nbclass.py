@@ -188,7 +188,7 @@ class Nb:
             try:
                 self.cur.execute("DELETE FROM keyword WHERE keywordId = ?;", key)
             except:
-                print("There was a problem deleting keyword %s" % key)
+                self.error("There was a problem deleting keyword %s" % key)
         self.con.commit()
 
 
@@ -222,7 +222,7 @@ class Nb:
                                 if noteId not in noteIds:
                                     noteIds.append(noteId)
                     except:
-                        print("problem finding keyword or note in database")
+                        self.error("problem finding keyword or note in database")
                         pass
         rval = []
         for n in noteIds:
@@ -284,7 +284,6 @@ class Nb:
                     test = re.compile(r'(\d+)([ ]*week)(s*)').match(due)
                     if test:
                         due = (now + datetime.timedelta(weeks=int(test.group(1))), sperday*7)
-                        #print("decoded weeks")
                     else:
                         due = (None, None)
         if self.debug:
@@ -313,7 +312,7 @@ CONTENT...
         try:
             file = tempfile.NamedTemporaryFile(suffix=".tmp") #, delete=False)
         except:
-            print('cannot create tempfile')
+            self.error('cannot create tempfile')
         file.write(initial_message)
         file.flush()
         #print("tempfile.name: '%s'" % tempfile.name)
