@@ -42,7 +42,7 @@ def get_from_dotfile(file, token, default=""):
     except:
         error("cannot open file '%s'" % file, file=sys.stderr)
 
-parser = argparse.ArgumentParser()
+parser = argparse.ArgumentParser(prog="nb", description="Nota Bene: an organizer for textual notes", epilog="(In active development)")
 parser.add_argument('action', choices=['add', 'find', 'edit', 'delete', 'version', 'RESET', 'cleanup'])
 parser.add_argument('-i', '--id', type=int, help="ID number of note to delete")
 parser.add_argument('-m', '--mode', type=str, default="interactive", choices=['interactive', 'plain', 'json'],
@@ -276,5 +276,6 @@ elif args.action == "cleanup":
     nb.cleanup()
 elif args.action == "version":
     print(nb.version())
+
 
 
