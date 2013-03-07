@@ -24,7 +24,7 @@ import os
 import re
 import datetime
 from time import strptime
-
+import subprocess
 
 def get_from_dotfile(file, token, default=""):
     try:
@@ -43,7 +43,7 @@ def get_from_dotfile(file, token, default=""):
         error("cannot open file '%s'" % file, file=sys.stderr)
 
 parser = argparse.ArgumentParser(prog="nb", description="Nota Bene: an organizer for textual notes", epilog="(In active development)")
-parser.add_argument('action', choices=['add', 'find', 'edit', 'delete', 'version', 'RESET', 'cleanup'])
+parser.add_argument("action", choices=["add", "find", "edit", "delete", "version", "RESET", "cleanup", "developer"])
 parser.add_argument('-i', '--id', type=int, help="ID number of note to delete")
 parser.add_argument('-m', '--mode', type=str, default="interactive", choices=['interactive', 'plain', 'json'],
         help="method for i/o")
@@ -276,6 +276,17 @@ elif args.action == "cleanup":
     nb.cleanup()
 elif args.action == "version":
     print(nb.version())
-
-
+elif args.action == "developer":
+    try:
+        out = subprocess.check_output(["git", "remote", "-v"], stderr=subprocess.STDOUT)
+        if out:
+            o = out.split('\n')
+            for repo in o:
+                if "push" in repo:
+                    repo = re.compile(r'.*/(.*)\.git.*$').match(repo).group(1)
+                    break
+    except:
+        repo = None
+    if repo:
+        print("in a git repo named: '%s'; maybe we should auto-tag with this?" % repo)
 

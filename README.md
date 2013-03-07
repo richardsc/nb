@@ -235,6 +235,15 @@ coded first.  It is unlikely that considerable work of adding general parsing
 of complex logical expressions will pay off in any significant way, so that is
 a low-priorty item.
 
+* Auto-tagging may be useful.  For example, Git users might appreciate
+  auto-tagging to the repo containing the present working directory, if there
+is one.  To test out whether this works, try
+
+    nb developer
+
+(which does nothing but print a message).
+    
+
 * There could be a graphical interface to supplement the command line
   interface.  However, constructing the graphical interface is arduous, so this
 is not a high priority.
