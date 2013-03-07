@@ -61,6 +61,7 @@ parser.add_argument("--due", type=str, default="", help="time when item is due [
 parser.add_argument('-p', "--pretty", type=str, default="", help="format for note output")
 args = parser.parse_args()
 
+args.keywordsoriginal = args.keywords
 args.keywords = args.keywords.split(',')
 
 # look in ~/.nbrc to see if a database is named there
@@ -170,7 +171,7 @@ if args.action == "add":
         git_repo = nb.find_git_repo()
         if git_repo:
             if len(args.keywords) > 0 and args.keywords[0] != "":
-                args.keywords.insert(0, git_repo)
+                args.keywords.insert(0, git_repo.strip())
             else:
                 args.keywords = [git_repo]
         ee = nb.editor_entry(title=args.title, keywords=args.keywords, content=args.content, privacy=args.privacy, due=args.due)
@@ -268,11 +269,20 @@ elif args.action == "delete":
         print("note with id number", args.id, "should be deleted now")
     nb.delete(args.id)
 elif args.action == "edit":
-    if not args.id:
-        nb.error("must give a note ID number (shown in <> by 'nb find')")
-    idnew = nb.edit(args.id)
-    if args.debug:
-        print("new note is numbered %d" % idnew)
+    if args.keywords:
+        if args.debug:
+            print("KEYWORD \"%s\"" % args.keywordsoriginal)
+        try:
+            k = args.keywordsoriginal.split('=')
+        except:
+            nb.error("must specify e.g. 'nb edit --keyword OLD=NEW'")
+        nb.rename_keyword(k[0], k[1])
+    elif args.id:
+        idnew = nb.edit(args.id)
+        if args.debug:
+            print("new note is numbered %d" % idnew)
+    else:
+        nb.error("must give a note ID number (shown in <> by 'nb find') or a keyword")
 elif args.action == "RESET":
     nb.initialize(author="me")
 elif args.action == "cleanup":

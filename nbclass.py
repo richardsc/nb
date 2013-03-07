@@ -104,7 +104,7 @@ class Nb:
         self.cur.execute("CREATE TABLE version(major, minor);")
         self.cur.execute("INSERT INTO version(major, minor) VALUES (?,?);",
                 (self.appversion[0], self.appversion[1]))
-        self.cur.execute("CREATE TABLE note(noteId integer primary key autoincrement, authorId, date, modified, title, content, privacy DEFAULT 0);")
+        self.cur.execute("CREATE TABLE note(noteId integer primary key autoincrement, authorId, date, modified, due, title, content, privacy DEFAULT 0);")
         self.cur.execute("CREATE TABLE author(authorId integer primary key autoincrement, name, nickname);")
         self.cur.execute("CREATE TABLE alias(aliasId integer primary key autoincrement, item, alias);")
         self.cur.execute("CREATE TABLE keyword(keywordId integer primary key autoincrement, keyword);")
@@ -357,4 +357,16 @@ CONTENT...
                         return repo
         except:
             return None
-    
+   
+    def rename_keyword(self, old, new):
+        if self.debug:
+            self.fyi("UPDATE keyword SET keyword=\"%s\" WHERE keyword=\"%s\";" % (new, old))
+        try:
+            self.cur.execute("UPDATE keyword SET keyword = ? WHERE keyword = ?;", (new, old))
+        except:
+            self.error("cannot change keyword from '%s' to '%s'" % (old, new))
+        try:
+            self.con.commit()
+        except:
+            self.error("cannot commit the database after changing keyword from '%s' to '%s'" % (old, new))
+

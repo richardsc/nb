@@ -110,21 +110,6 @@ One or more notes can also be added through input of a JSON file, e.g.
 
     nb add --mode json --file note.json
 
-
-### Edit a note
-
-To edit a note, you must know its ID, which is given between the ``<`` and the
-``>`` in the output from ``nb find``.  For example, to edit note number 4, do
-as follows.
-
-    nb edit --id 4
-
-This will open up the text editor you have specified in your ``EDITOR``
-environment variable, or the ``vim`` editor if you have not specified this
-variable.  Just follow the instructions and close the editor, and a new note
-will have been created, with the note having been deleted.
-
-
 ### Find notes
 
 At present, the only way to find notes is by searching for a keyword, e.g.
@@ -154,6 +139,32 @@ contain
 that is the sensible option.)
     
 
+
+### Edit a note
+
+To edit a note, you must know its ID, which is given between the ``<`` and the
+``>`` in the output from ``nb find``.  For example, to edit note number 4, do
+as follows.
+
+    nb edit --id 4
+
+This will open up the text editor you have specified in your ``EDITOR``
+environment variable, or the ``vim`` editor if you have not specified this
+variable.  Just follow the instructions and close the editor, and a new note
+will have been created, with the note having been deleted.
+
+
+
+### Alter a keyword
+
+Use e.g.
+
+    nb edit -k OAR=oar
+
+so that all notes with keyword "OAR" will henceforth have that keyword changed to "oar".
+
+
+
 ### Export notes
 
 Notes may be exported to a JSON file by e.g.
@@ -171,6 +182,7 @@ to extract the note with the stated ID, or e.g.
 to extract notes with keyword "arctic".
 
 
+
 ### Import notes
 
 An individual note (e.g. a chunk of information from the ``note_1.txt`` file
@@ -184,11 +196,13 @@ to colleagues, so they can import them into their own databases.
 Bug: this only works for *single* notes, at the present time.
 
 
+
 ### Dump database
 
 Advanced users may want to dump the whole database with
 
     echo ".dump" | sqlite3 nb.db
+
 
 
 ### Back up the database
@@ -200,6 +214,7 @@ database daily (adjust the filenames appropriately).
 
 (This could be done better by checking the sha value of the file, to only
 backup when things have changed.)
+
 
 
 ### Task count in bash prompt
