@@ -102,6 +102,10 @@ or
 
     nb add --title "a new note"
 
+In this editor-based method, there is an additional feature that if the present
+working directory is within a git repository, then the name of the git
+repository is automatically added to the suggested keyword list.
+
 One or more notes can also be added through input of a JSON file, e.g.
 
     nb add --mode json --file note.json
@@ -235,14 +239,16 @@ coded first.  It is unlikely that considerable work of adding general parsing
 of complex logical expressions will pay off in any significant way, so that is
 a low-priorty item.
 
-* Auto-tagging may be useful.  For example, Git users might appreciate
-  auto-tagging to the repo containing the present working directory, if there
-is one.  To test out whether this works, try
+* It would be good to have a method of renaming keywords, e.g.
 
-    nb developer
+    nb edit --keyword KEYWORD
 
-(which does nothing but print a message).
-    
+could perhaps load up an editor that contains just the keyword.  Altneratively,
+(and probably easier on the user and the developer!) there could be a scheme
+like
+
+    nb edit --keyword NEWword=OLDword
+
 
 * There could be a graphical interface to supplement the command line
   interface.  However, constructing the graphical interface is arduous, so this
