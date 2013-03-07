@@ -269,7 +269,11 @@ elif args.action == "delete":
         print("note with id number", args.id, "should be deleted now")
     nb.delete(args.id)
 elif args.action == "edit":
-    if args.keywords:
+    if args.id:
+        idnew = nb.edit(args.id)
+        if args.debug:
+            print("new note is numbered %d" % idnew)
+    elif args.keywords:
         if args.debug:
             print("KEYWORD \"%s\"" % args.keywordsoriginal)
         try:
@@ -277,10 +281,6 @@ elif args.action == "edit":
         except:
             nb.error("must specify e.g. 'nb edit --keyword OLD=NEW'")
         nb.rename_keyword(k[0], k[1])
-    elif args.id:
-        idnew = nb.edit(args.id)
-        if args.debug:
-            print("new note is numbered %d" % idnew)
     else:
         nb.error("must give a note ID number (shown in <> by 'nb find') or a keyword")
 elif args.action == "RESET":
