@@ -166,10 +166,13 @@ if args.action == "add":
     elif args.mode == 'interactive' and (args.title == "" or args.content == "" or args.keywords == ""):
         if args.debug:
             print("should handle interactive now")
-        if args.debug:
-             print( "TITLE '%s'" % title)
-             print( "KEYWORDS '%s'" % keywords)
-             print( "CONTENT '%s'" % content)
+        # append repo name ... FIXME: should be a flag controlling whether to do this
+        git_repo = nb.find_git_repo()
+        if git_repo:
+            if len(args.keywords) > 0 and args.keywords[0] != "":
+                args.keywords.insert(0, git_repo)
+            else:
+                args.keywords = [git_repo]
         ee = nb.editor_entry(title=args.title, keywords=args.keywords, content=args.content, privacy=args.privacy, due=args.due)
         id = nb.add(title=ee["title"], keywords=ee["keywords"], content=ee["content"], privacy=ee["privacy"], due=ee["due"])
     else:
@@ -277,16 +280,7 @@ elif args.action == "cleanup":
 elif args.action == "version":
     print(nb.version())
 elif args.action == "developer":
-    try:
-        out = subprocess.check_output(["git", "remote", "-v"], stderr=subprocess.STDOUT)
-        if out:
-            o = out.split('\n')
-            for repo in o:
-                if "push" in repo:
-                    repo = re.compile(r'.*/(.*)\.git.*$').match(repo).group(1)
-                    break
-    except:
-        repo = None
+    repo = nb.find_git_repo()
     if repo:
-        print("in a git repo named: '%s'; maybe we should auto-tag with this?" % repo)
+        print("DEVELOPER: in a git repo named: '%s'; maybe we should auto-tag with this?" % repo)
 

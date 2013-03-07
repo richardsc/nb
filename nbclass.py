@@ -8,7 +8,7 @@ import json
 import difflib
 import re
 import tempfile
-from subprocess import call
+import subprocess
 
 class Nb:
     def __init__(self, db="nb.db", authorId=1, debug=0, quiet=False):
@@ -345,4 +345,16 @@ CONTENT...
         content = content.rstrip('\n')
         keywords = keywords.split(',')
         return {"title":title, "keywords":keywords, "content":content, "privacy":privacy, "due":due}
- 
+
+    def find_git_repo(self):
+        try:
+            out = subprocess.check_output(["git", "remote", "-v"], stderr=subprocess.STDOUT)
+            if out:
+                o = out.split('\n')
+                for repo in o:
+                    if "push" in repo:
+                        repo = re.compile(r'.*/(.*)\.git.*$').match(repo).group(1)
+                        return repo
+        except:
+            return None
+    
