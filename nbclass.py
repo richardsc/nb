@@ -1,4 +1,5 @@
-#!/usr/bin/env python3
+#!/usr/bin/python
+from __future__ import print_function
 import sys
 import sqlite3 as sqlite
 import datetime
@@ -325,7 +326,7 @@ CONTENT...
             file = tempfile.NamedTemporaryFile(suffix=".tmp") #, delete=False)
         except:
             self.error('cannot create tempfile')
-        file.write(bytes(initial_message, "UTF-8"))
+        file.write(initial_message)
         file.flush()
         #print("tempfile.name: '%s'" % tempfile.name)
         EDITOR = os.environ.get('EDITOR','vi') 
