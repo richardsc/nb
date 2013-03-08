@@ -220,12 +220,11 @@ elif args.action == "find":
         elif args.mode == "json":
             print(f['json'])
         elif args.mode== 'markdown':
-            print("# %s\n" %f ['title'])
-            print("**Note ID:** %s\n" %f ['noteId'], end='')
-            print("; **keywords:** ", end='')
+            print("**%s**\n" %f ['title'])
+            print("<%s>\n" %f ['noteId'], end='')
             for k in f['keywords']:
                 print("[%s] " % k, end='')
-            print('\n')
+            print("{%s / %s}\n" % (f['date'], f['modified']))
             print(f['content'].lstrip())
         else:
             if args.pretty == "oneline" and nfound > 1:
