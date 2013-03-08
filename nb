@@ -3,12 +3,13 @@
 '''
 There are several ways to use nb.
 
-./na add --title "oceanpython" --keyword "lecture,python" --content "It was a great talk"
-./na add --title "life is grand"     # opens up a text editor to get keywords and content
-./na add                             # interact with user to get the note information
-./na add --mode json < notes.json    # infer notes from a JSON file (ignore other arguments)
-./na find                            # show all notes
-./na find --keyword "lecture"        # show notes with keyword 'lecture'
+na add --title "oceanpython" --keyword "lecture,python" --content "It was a great talk"
+na add --title "life is grand"     # opens up a text editor to get keywords and content
+na add                             # interact with user to get the note information
+na add --mode json < notes.json    # infer notes from a JSON file (ignore other arguments)
+nb                                 # show all notes
+nb find                            #   "   "    "
+na find --keyword "lecture"        # show notes with keyword 'lecture'
 '''
 from nbclass import Nb
 import argparse
