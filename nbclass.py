@@ -162,7 +162,7 @@ class Nb:
         return True
 
     def edit(self, id=-1):
-        # BUG: should update modified
+        # Edit a note, avoiding code repetition by making a new one and then renumbering it
         if id < 0:
             self.warning("cannot delete a note with a negative id number (%s)" % id)
         n = self.cur.execute("SELECT title,content,privacy,due,date FROM note WHERE noteId = ?;", [id])
@@ -172,7 +172,20 @@ class Nb:
         ee = self.editor_entry(title=note[0], keywords=keywords, content=note[1], privacy=note[2], due=note[3])
         idnew = self.add(title=ee["title"], keywords=ee["keywords"], content=ee["content"], privacy=ee["privacy"],
                 due=ee["due"], date=note[4], modified=datetime.datetime.now())
-        self.delete(id) # FIXME: should reuse the noteId
+        self.delete(id)
+        try:
+            if self.debug:
+                self.fyi("UPDATE notekeyword SET noteid=%d WHERE noteid=%d;" % (id, idnew))
+            self.cur.execute("UPDATE notekeyword SET noteid=? WHERE noteid=?;", (id, idnew))
+        except:
+            self.error("cannot update notekeyword database to reflect reassignment of temporary note %d as %d", (idnew, id))
+        try:
+            if self.debug:
+                self.fyi("UPDATE note SET noteid=%d WHERE noteid=%d;" % (id, idnew))
+            self.cur.execute("UPDATE note SET noteid=? WHERE noteid=?;", (id, idnew))
+        except:
+            self.error("cannot update note database to reflect reassignment of temporary note %d as %d", (idnew, id))
+        self.con.commit()
         return idnew
 
     def cleanup(self):

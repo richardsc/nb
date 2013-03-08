@@ -166,8 +166,7 @@ as follows.
 
 This will open up the text editor you have specified in your ``EDITOR``
 environment variable, or the ``vim`` editor if you have not specified this
-variable.  Just follow the instructions and close the editor, and a new note
-will have been created, with the note having been deleted.
+variable, just as if a new note were being created.
 
 
 
