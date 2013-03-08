@@ -270,17 +270,6 @@ coded first.  It is unlikely that considerable work of adding general parsing
 of complex logical expressions will pay off in any significant way, so that is
 a low-priorty item.
 
-* It would be good to have a method of renaming keywords, e.g.
-
-    nb edit --keyword KEYWORD
-
-could perhaps load up an editor that contains just the keyword.  Altneratively,
-(and probably easier on the user and the developer!) there could be a scheme
-like
-
-    nb edit --keyword NEWword=OLDword
-
-
 * There could be a graphical interface to supplement the command line
   interface.  However, constructing the graphical interface is arduous, so this
 is not a high priority.
