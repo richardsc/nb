@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/env python3
 
 '''
 There are several ways to use nb.
@@ -10,12 +10,6 @@ There are several ways to use nb.
 ./na find                            # show all notes
 ./na find --keyword "lecture"        # show notes with keyword 'lecture'
 '''
-from __future__ import print_function
-# next block lets us use the python3 'input'
-try:
-    input = raw_input
-except:
-    pass
 from nbclass import Nb
 import argparse
 import sys
