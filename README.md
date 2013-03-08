@@ -110,15 +110,6 @@ One or more notes can also be added through input of a JSON file, e.g.
 
     nb add --mode json --file note.json
 
-Another useful output mode is ``markdown``, e.g. 
-
-    nb find -i 95 -m markdown| pandoc > ~/a.html
-
-yields a file that can be reasonably well-formatted in a browser, provided that
-the input was entered in a
-[markdown](http://daringfireball.net/projects/markdown) format (which is
-recommended even if this option is not to be used).
-
 ### Find notes
 
 At present, the only way to find notes is by searching for a keyword, e.g.
@@ -147,6 +138,15 @@ contain
 (If only one note is being shown, the format always reverts to ``all``, since
 that is the sensible option.)
     
+A useful output mode is ``markdown``, e.g. 
+
+    nb find -i 1 -m markdown | pandoc > ~/a.html
+
+yields a file that can be reasonably well-formatted in a browser, provided that
+the input was entered in a
+[markdown](http://daringfireball.net/projects/markdown) format (which is
+recommended even if this option is not to be used).
+
 
 
 ### Edit a note
