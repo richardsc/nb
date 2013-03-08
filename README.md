@@ -112,6 +112,9 @@ One or more notes can also be added through input of a JSON file, e.g.
 
 ### Find notes
 
+
+#### Find notes matching patterns
+
 At present, the only way to find notes is by searching for a keyword, e.g.
 
     nb find --keyword "lecture"
@@ -123,10 +126,6 @@ as "lecture".  However, this scheme can have surprising results, so the
 To get all the notes, use
 
     nb find
-
-To find a note with a given ID, use e.g.
-
-    nb find --id 1
 
 The format of multiple notes can be controlled with the argument ``--pretty``
 (abbreviated ``-p``), which may be either ``all``,  ``oneline`` or ``twoline``.
@@ -142,12 +141,20 @@ A useful output mode is ``markdown``, e.g.
 
     nb find -i 1 -m markdown | pandoc > ~/a.html
 
-yields a file that can be reasonably well-formatted in a browser, provided that
-the input was entered in a
-[markdown](http://daringfireball.net/projects/markdown) format (which is
-recommended even if this option is not to be used).
+yields an HTML file that can be reasonably well-formatted in a browser,
+provided that the input was entered in a
+[markdown](http://daringfireball.net/projects/markdown) format (a format that
+is recommended even if this HTML option is not to be used).
 
+#### Find a particular note
 
+To find a note with a given ID, use e.g.
+
+    nb find --id 1
+
+or the shorter form
+
+    nb 1
 
 ### Edit a note
 

@@ -43,7 +43,7 @@ def get_from_dotfile(file, token, default=""):
         error("cannot open file '%s'" % file, file=sys.stderr)
 
 parser = argparse.ArgumentParser(prog="nb", description="Nota Bene: an organizer for textual notes", epilog="(In active development)")
-parser.add_argument("action", choices=["add", "find", "edit", "delete", "version", "RESET", "cleanup", "developer"])
+parser.add_argument("action")#, choices=["add", "find", "edit", "delete", "version", "RESET", "cleanup", "developer"])
 parser.add_argument('-i', '--id', type=int, help="ID number of note to delete")
 parser.add_argument('-m', '--mode', type=str, default="interactive", choices=['interactive', 'plain', 'json', 'markdown'],
         help="method for i/o")
@@ -89,6 +89,14 @@ else:
     content = ""
 
 ## This conditional block is very long, and may be hard to read.
+
+## a trick so that e.g. 'nb 1' becomes 'nb find --id 1'
+try:
+    args.id = int(args.action)
+    args.action = "find"
+except:
+    pass
+
 if args.action == "add":
     if args.mode == 'json':
         if not args.file:
