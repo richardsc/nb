@@ -37,7 +37,11 @@ def get_from_dotfile(file, token, default=""):
         error("cannot open file '%s'" % file, file=sys.stderr)
 
 parser = argparse.ArgumentParser(prog="nb", description="Nota Bene: an organizer for textual notes", epilog="(In active development)")
-parser.add_argument("action")#, choices=["add", "find", "edit", "delete", "version", "RESET", "cleanup", "developer"])
+
+# 'nb' is an alias for 'nb find'
+have_args = len(sys.argv) > 1
+if have_args:
+    parser.add_argument("action")#, choices=["add", "find", "edit", "delete", "version", "RESET", "cleanup", "developer"])
 parser.add_argument('-i', '--id', type=int, help="ID number of note to delete")
 parser.add_argument('-m', '--mode', type=str, default="interactive", choices=['interactive', 'plain', 'json', 'markdown'],
         help="method for i/o")
@@ -91,7 +95,7 @@ try:
 except:
     pass
 
-if args.action == "add":
+if have_args and args.action == "add":
     if args.mode == 'json':
         if not args.file:
             nb.error("Must use --file to name an input file")
@@ -180,7 +184,7 @@ if args.action == "add":
         id = nb.add(title=ee["title"], keywords=ee["keywords"], content=ee["content"], privacy=ee["privacy"], due=ee["due"])
     else:
         id = nb.add(title=args.title, keywords=args.keywords, content=args.content, privacy=args.privacy, due=args.due)
-elif args.action == "find":
+elif (not have_args) or args.action == "find":
     due_requested = nb.interpret_time(args.due)
     #print("due_requested:", due_requested)
     if args.keywords[0] != '':
