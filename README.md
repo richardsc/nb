@@ -174,9 +174,6 @@ Use e.g.
 
 so that all notes with keyword "OAR" will henceforth have that keyword changed to "oar".
 
-FIXME: this probably does not work now.
-
-
 
 ### Export notes
 
@@ -216,7 +213,7 @@ to colleagues, so they can import them into their own databases.
 
 Bug: this only works for *single* notes, at the present time.
 
-FIXME: this probably does not work at the moment.
+**FIXME: this probably does not work at the moment.**
 
 
 

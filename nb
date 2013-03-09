@@ -200,21 +200,19 @@ if args.add:
 
 elif args.edit:
     if args.keywords[0] != "":
-        nb.error("a recent refactoring of the code has broken the editing of keywords.  This will return")
-    if not id_desired:
-        nb.error("must provide an ID, e.g. 'nb 1 -e' to edit note with ID=1")
-    idnew = nb.edit(id_desired)
-    # FIXME: this breaks the editing of keywords
-    #elif args.keywords:
-    #    if args.debug:
-    #        print("KEYWORD \"%s\"" % args.keywordsoriginal)
-    #    try:
-    #        k = args.keywordsoriginal.split('=')
-    #    except:
-    #        nb.error("must specify e.g. 'nb edit --keyword OLD=NEW'")
-    #    nb.rename_keyword(k[0], k[1])
-    #else:
-    #    nb.error("must give a note ID number (shown in <> by 'nb find') or a keyword")
+        if args.debug:
+            print("KEYWORD \"%s\"" % args.keywordsoriginal)
+        try:
+            k = args.keywordsoriginal.split('=')
+        except:
+            nb.error("must specify e.g. 'nb edit --keyword OLD=NEW'")
+        if args.debug:
+            nb.fyi("renaming '%s' to '%s'" % (k[0], k[1]))
+        nb.rename_keyword(k[0], k[1])
+    else:
+        if not id_desired:
+            nb.error("must provide an ID, e.g. 'nb 1 -e' to edit note with ID=1")
+        idnew = nb.edit(id_desired)
     sys.exit(0)
 
 
