@@ -74,7 +74,7 @@ following lines, adjusted for the directory name
 
 The default database file is ``~/Dropbox/nb.db``, but this may not suit all
 users, so there are two ways to specify a different file.  The first way is to
-supply the filename as an argument, e.g. ``nb find --db ~/nb.db``.  The second
+supply the filename as an argument, e.g. ``nb --db ~/nb.db``.  The second
 way is to name a default database in an initialization file named ``~/.nbrc``;
 for example it might contain the following.
 
@@ -117,7 +117,7 @@ One or more notes can also be added through input of a JSON file, e.g.
 
 At present, the only way to find notes is by searching for a keyword, e.g.
 
-    nb find --keyword "lecture"
+    nb --keyword "lecture"
 
 Note that the search is fuzzy, so that e.g. "leture" would get the same results
 as "lecture".  However, this scheme can have surprising results, so the
@@ -125,7 +125,7 @@ as "lecture".  However, this scheme can have surprising results, so the
 
 To get all the notes, use
 
-    nb find
+    nb
 
 The format of multiple notes can be controlled with the argument ``--pretty``
 (abbreviated ``-p``), which may be either ``all``,  ``oneline`` or ``twoline``.
@@ -139,7 +139,7 @@ that is the sensible option.)
     
 A useful output mode is ``markdown``, e.g. 
 
-    nb find -i 1 -m markdown | pandoc > ~/a.html
+    nb 1 -m markdown | pandoc > ~/a.html
 
 yields an HTML file that can be reasonably well-formatted in a browser,
 provided that the input was entered in a
@@ -150,19 +150,15 @@ is recommended even if this HTML option is not to be used).
 
 To find a note with a given ID, use e.g.
 
-    nb find --id 1
-
-or the shorter form
-
     nb 1
 
 ### Edit a note
 
 To edit a note, you must know its ID, which is given between the ``<`` and the
-``>`` in the output from ``nb find``.  For example, to edit note number 4, do
-as follows.
+``>`` in the output from ``nb``.  For example, to edit note number 4, do as
+follows.
 
-    nb edit --id 4
+    nb 4 --edit
 
 This will open up the text editor you have specified in your ``EDITOR``
 environment variable, or the ``vim`` editor if you have not specified this
@@ -174,9 +170,11 @@ variable, just as if a new note were being created.
 
 Use e.g.
 
-    nb edit -k OAR=oar
+    nb -e -k OAR=oar
 
 so that all notes with keyword "OAR" will henceforth have that keyword changed to "oar".
+
+FIXME: this probably does not work now.
 
 
 
@@ -184,18 +182,26 @@ so that all notes with keyword "OAR" will henceforth have that keyword changed t
 
 Notes may be exported to a JSON file by e.g.
 
-    nb find --mode json > notes.json
+    nb --mode json > notes.json
 
 or probably more usefully, in plain format by e.g.
 
-    nb find --id 1 > note_1.txt
+    nb 1 > note_1.txt
 
 to extract the note with the stated ID, or e.g.
 
-    nb find --key arctic > note_arctic.txt
+    nb -k arctic > note_arctic.txt
 
 to extract notes with keyword "arctic".
 
+
+### Delete a note
+
+Notes to be delete are named as the first argument, e.g.
+
+    nb 1 --delete
+
+would delete the note with ID 1.
 
 
 ### Import notes
@@ -203,12 +209,14 @@ to extract notes with keyword "arctic".
 An individual note (e.g. a chunk of information from the ``note_1.txt`` file
 created immediately above) can be imported by e.g.
 
-    nb add --mode plain < note_1.txt
+    nb -a --mode plain < note_1.txt
 
 This, combined with the export mechanism, provides an easy way to email notes
 to colleagues, so they can import them into their own databases.
 
 Bug: this only works for *single* notes, at the present time.
+
+FIXME: this probably does not work at the moment.
 
 
 
@@ -237,7 +245,7 @@ backup when things have changed.)
 To get a list of notes that are due today, put the following in your ``~/.bash_profile`` file:
 
     function nb_count {
-        nb find --due today --count
+        nb --due today --count
     }
     PS1="\h:\W"
     export PS1="$PS1<\$(nb_count)> "

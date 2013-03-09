@@ -3,13 +3,21 @@
 '''
 There are several ways to use nb.
 
-na add --title "oceanpython" --keyword "lecture,python" --content "It was a great talk"
-na add --title "life is grand"     # opens up a text editor to get keywords and content
-na add                             # interact with user to get the note information
-na add --mode json < notes.json    # infer notes from a JSON file (ignore other arguments)
-nb                                 # show all notes
-nb find                            #   "   "    "
-na find --keyword "lecture"        # show notes with keyword 'lecture'
+na -a                         # open up an editor to make a new note ('-a' is short for '--add')
+na -a -t "life is grand"      # as above, but preset note title ('-t' is short for '--title')
+na -a -m json < notes.json    # infer notes from a JSON file (ignore other arguments)
+
+nb                            # show all notes
+nb 1                          # show note #1
+nb 1 -m markdown              # show note #1 in markdown format ('-m' is short for '--mode')
+nb -k "lecture"               # show notes with keyword 'lecture' ('-k' is short for '--keyword')
+
+nb 1 -e                       # edit note #1 ('-e' is short for '--edit')
+
+nb 1 -d                       # delete note #1
+
+Note: the note ID must always be in the first argument, preceeding any other arguments.
+
 '''
 from __future__ import print_function
 from nbclass import Nb
@@ -38,20 +46,29 @@ def get_from_dotfile(file, token, default=""):
     except:
         error("cannot open file '%s'" % file, file=sys.stderr)
 
+
+# If second arg is a number, it is a noteId
+id_desired = None
+if len(sys.argv) > 1:
+    try:
+        id_desired = int(sys.argv[1])
+        del sys.argv[1]
+    except:
+        pass
+
 parser = argparse.ArgumentParser(prog="nb", description="Nota Bene: an organizer for textual notes", epilog="(In active development)")
 
-# 'nb' is an alias for 'nb find'
-have_args = len(sys.argv) > 1
-if have_args:
-    parser.add_argument("action")#, choices=["add", "find", "edit", "delete", "version", "RESET", "cleanup", "developer"])
-parser.add_argument('-i', '--id', type=int, help="ID number of note to delete")
+parser.add_argument('-i', '--id', type=int, help="ID number of note to work with")
+parser.add_argument('-a', "--add", action="store_true", dest="add", default=False, help="add a note")
+parser.add_argument('-e', "--edit", action="store_true", dest="edit", default=False, help="edit a note")
+parser.add_argument('-d', "--delete", action="store_true", dest="delete", default=False, help="delete a note")
 parser.add_argument('-m', '--mode', type=str, default="interactive", choices=['interactive', 'plain', 'json', 'markdown'],
         help="method for i/o")
 parser.add_argument('-t', "--title", type=str, default="", help="title (short)")
 parser.add_argument("-k", "--keywords", type=str, default="", help="comma-separated keywords")
 parser.add_argument('-c', "--content", type=str, default="", help="content")
 parser.add_argument("--count", action="store_true", dest="count", default=False, help="report only count of found results")
-parser.add_argument('-d', "--debug", action="store_true", dest="debug", default=False, help="set debugging on")
+parser.add_argument("--debug", action="store_true", dest="debug", default=False, help="set debugging on")
 parser.add_argument("--privacy", type=int, default=0, help="set privacy level (0=open, 1=closed)")
 parser.add_argument("--file", type=str, help="filename for input (add) or output (find)")
 defaultDatabase = get_from_dotfile("~/.nbrc", "db", "~/Dropbox/nb.db")
@@ -59,10 +76,16 @@ parser.add_argument("--db", type=str, default=defaultDatabase, help="filename fo
 parser.add_argument("--strict", action="store_true", default=False, help="use strict search?")
 parser.add_argument("--due", type=str, default="", help="time when item is due [not used yet]")
 parser.add_argument('-p', "--pretty", type=str, default="", help="format for note output")
+parser.add_argument('-v', "--version", action="store_true", dest="version", default=False, help="get version number")
+parser.add_argument("--developer", action="store_true", default=False, help="flag for the developer *only*")
 args = parser.parse_args()
 
 args.keywordsoriginal = args.keywords
 args.keywords = args.keywords.split(',')
+
+if args.version:
+    print(nb.version())
+    sys.exit(0)
 
 # look in ~/.nbrc to see if a database is named there
 if not args.pretty:
@@ -76,28 +99,15 @@ else:
     file = "stdout"
 
 if args.title:
-    if args.action != "add":
-        nb.warning("--title is ignored unless --action!='add'")
     title = args.title
 else:
     title = ""
 if args.content:
-    if args.action != "add":
-        nb.warning("--content is ignored unless --action='add'")
     content = args.content
 else:
     content = ""
 
-## This conditional block is very long, and may be hard to read.
-
-## a trick so that e.g. 'nb 1' becomes 'nb find --id 1'
-try:
-    args.id = int(args.action)
-    args.action = "find"
-except:
-    pass
-
-if have_args and args.action == "add":
+if args.add:
     if args.mode == 'json':
         if not args.file:
             nb.error("Must use --file to name an input file")
@@ -186,10 +196,49 @@ if have_args and args.action == "add":
         id = nb.add(title=ee["title"], keywords=ee["keywords"], content=ee["content"], privacy=ee["privacy"], due=ee["due"])
     else:
         id = nb.add(title=args.title, keywords=args.keywords, content=args.content, privacy=args.privacy, due=args.due)
-elif (not have_args) or args.action == "find":
+    sys.exit(0)
+
+elif args.edit:
+    if args.keywords[0] != "":
+        nb.error("a recent refactoring of the code has broken the editing of keywords.  This will return")
+    if not id_desired:
+        nb.error("must provide an ID, e.g. 'nb 1 -e' to edit note with ID=1")
+    idnew = nb.edit(id_desired)
+    # FIXME: this breaks the editing of keywords
+    #elif args.keywords:
+    #    if args.debug:
+    #        print("KEYWORD \"%s\"" % args.keywordsoriginal)
+    #    try:
+    #        k = args.keywordsoriginal.split('=')
+    #    except:
+    #        nb.error("must specify e.g. 'nb edit --keyword OLD=NEW'")
+    #    nb.rename_keyword(k[0], k[1])
+    #else:
+    #    nb.error("must give a note ID number (shown in <> by 'nb find') or a keyword")
+    sys.exit(0)
+
+
+elif args.delete:
+    if not id_desired:
+        nb.error("must give a note ID number (shown in <> by 'nb find')")
+        sys.exit(1)
+    if args.debug:
+        nb.fyi("note with id number", id_desired, "should be deleted now")
+    nb.delete(id_desired)
+    sys.exit(0)
+
+
+elif args.developer:
+    repo = nb.find_git_repo()
+    if repo:
+        print("DEVELOPER: in a git repo named: '%s'; maybe we should auto-tag with this?" % repo)
+    sys.exit(0)
+
+else: # By a process of elimination, we must be trying to find notes.
     due_requested = nb.interpret_time(args.due)
-    #print("due_requested:", due_requested)
-    if args.keywords[0] != '':
+    if id_desired:
+        found = nb.find(id=id_desired, mode=args.mode, strict=args.strict)
+    elif args.keywords[0] != '':
         found = nb.find(keywords=args.keywords, mode=args.mode, strict=args.strict)
     elif args.id:
         found = nb.find(id=args.id, mode=args.mode, strict=args.strict)
@@ -227,7 +276,7 @@ elif (not have_args) or args.action == "find":
             print(f['json'])
         elif args.mode== 'markdown':
             print("**%s**\n" %f ['title'])
-            print("<%s>\n" %f ['noteId'], end='')
+            print("<%s> " %f ['noteId'], end='')
             for k in f['keywords']:
                 print("[%s] " % k, end='')
             print("{%s / %s}\n" % (f['date'], f['modified']))
@@ -276,36 +325,5 @@ elif (not have_args) or args.action == "find":
                     print('')
     if args.count:
         print(count)
-elif args.action == "delete":
-    if not args.id:
-        nb.error("must give a note ID number (shown in <> by 'nb find')")
-        sys.exit(1)
-    if args.debug:
-        print("note with id number", args.id, "should be deleted now")
-    nb.delete(args.id)
-elif args.action == "edit":
-    if args.id:
-        idnew = nb.edit(args.id)
-        if args.debug:
-            print("new note is numbered %d" % idnew)
-    elif args.keywords:
-        if args.debug:
-            print("KEYWORD \"%s\"" % args.keywordsoriginal)
-        try:
-            k = args.keywordsoriginal.split('=')
-        except:
-            nb.error("must specify e.g. 'nb edit --keyword OLD=NEW'")
-        nb.rename_keyword(k[0], k[1])
-    else:
-        nb.error("must give a note ID number (shown in <> by 'nb find') or a keyword")
-elif args.action == "RESET":
-    nb.initialize(author="me")
-elif args.action == "cleanup":
-    nb.cleanup()
-elif args.action == "version":
-    print(nb.version())
-elif args.action == "developer":
-    repo = nb.find_git_repo()
-    if repo:
-        print("DEVELOPER: in a git repo named: '%s'; maybe we should auto-tag with this?" % repo)
+    
 
