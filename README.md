@@ -91,16 +91,16 @@ in the previous section.
 
 This may be done one at a time, with commandline arguments, e.g.
 
-    nb add --keywords 'lecture,physics,MIT' --title="Walter Lewin physics lectures" --content="http://ocw.mit.edu/courses/physics/8-01-physics-i-classical-mechanics-fall-1999/index.htm"
+    nb --add --keywords 'lecture,physics,MIT' --title="Walter Lewin physics lectures" --content="http://ocw.mit.edu/courses/physics/8-01-physics-i-classical-mechanics-fall-1999/index.htm"
 
 Another method is with an editor-based supply of the information, which is done
 unless ``--keywords``, ``--title``, and ``--content`` are all given, e.g.
 
-    nb add
+    nb --add
 
 or
 
-    nb add --title "a new note"
+    nb --add --title "a new note"
 
 In this editor-based method, there is an additional feature that if the present
 working directory is within a git repository, then the name of the git
@@ -108,7 +108,7 @@ repository is automatically added to the suggested keyword list.
 
 One or more notes can also be added through input of a JSON file, e.g.
 
-    nb add --mode json --file note.json
+    nb --add --mode json --file note.json
 
 ### Find notes
 
