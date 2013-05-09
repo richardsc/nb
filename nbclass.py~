@@ -118,6 +118,7 @@ class Nb:
         Notes with privacy > 0 are increasingly hidden (or will be, when the
         application is more complete). '''
         title = title.decode('utf-8')
+        keywords = keywords.decode('utf-8')
         content = content.decode('utf-8')
         due = self.interpret_time(due)[0]
         now = datetime.datetime.now()
@@ -127,7 +128,6 @@ class Nb:
                 (self.authorId, date, modified, title, content, privacy, due))
         noteId = self.cur.lastrowid
         for keyword in keywords:
-            keyword = keyword.decode('utf-8')
             if self.debug:
                 print(" inserting keyword:", keyword)
             keywordId = self.con.execute("SELECT keywordId FROM keyword WHERE keyword = ?;", [keyword]).fetchone()
