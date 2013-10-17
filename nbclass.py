@@ -328,7 +328,7 @@ CONTENT...
             file = tempfile.NamedTemporaryFile(suffix=".tmp") #, delete=False)
         except:
             self.error('cannot create tempfile')
-        file.write(initial_message)
+        file.write(initial_message.encode('utf-8'))
         file.flush()
         #print("tempfile.name: '%s'" % tempfile.name)
         EDITOR = os.environ.get('EDITOR','vi') 
