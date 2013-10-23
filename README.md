@@ -51,13 +51,14 @@ obsolescence.
 * Tell others of the project and invite discussion of features (especially
   database design).
 
-### 2013-03
+### 2013-03 to 2013-12
 
-* Based on experience in everyday use, firm up the database design.
+* Based on experience in everyday use, firm up the database design.  (Q: should there be a history feature so that editing actions can be undone?)
 
-* Invite other developers to work on editor-based versions.
+* Investigate interest in editor-based versions.
 
-* Develop a trial web-based version.
+* Possibly develop a web-based version.
+
 
 
 ## Using nb
