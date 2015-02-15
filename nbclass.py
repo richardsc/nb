@@ -169,6 +169,8 @@ class Nb:
             self.warning("cannot delete a note with a negative id number (%s)" % id)
         n = self.cur.execute("SELECT title,content,privacy,due,date FROM note WHERE noteId = ?;", [id])
         note = n.fetchone()
+        if not note:
+            self.error("no note number %d" % id)
         keywords = []
         keywords.extend(self.get_keywords(id))
         ee = self.editor_entry(title=note[0], keywords=keywords, content=note[1], privacy=note[2], due=note[3])
@@ -307,6 +309,20 @@ class Nb:
 
 
     def editor_entry(self, title, keywords, content, privacy=0, due=""):
+        remaining = None
+        if due:
+            now = datetime.datetime.now()
+            #print("due: %s" % due)
+            #print(due)
+            DUE = datetime.datetime.strptime(due, "%Y-%m-%d %H:%M:%S.%f")
+            remaining = (DUE - now).total_seconds()
+            #print("remaining: %s" % remaining)
+            if (abs(remaining) < 86400):
+                remaining = "%d hours" % round(remaining / 3600)
+            else:
+                remaining = "%d days" % round(remaining / 86400)
+            #print("remaining: %s" % remaining)
+            due = remaining
         initial_message = '''Instructions: fill in material following the ">" symbol.  (Items following the
 "?>" symbol are optional.  The title and keywords must each fit on one line.
 Use commas to separate keywords.  The content must start *below* the line
@@ -318,10 +334,9 @@ KEYWORDS> %s
 
 PRIVACY> %s
 
-DUE?> %s
+DUE (E.G. 'tomorrow' or '3 days')> %s
 
 CONTENT...
-
 %s
 ''' % (title, ",".join(k for k in keywords), privacy, due, content)
         try:
