@@ -249,6 +249,8 @@ class Nb:
                 self.warning("Problem extracting note from database")
                 next
             if note:
+                date = note[2]
+                due = note[5]
                 privacy = note[6]
                 keywordIds = []
                 keywordIds.extend(self.con.execute("SELECT keywordid FROM notekeyword WHERE notekeyword.noteid = ?;", n))
@@ -258,7 +260,7 @@ class Nb:
                 if mode == 'json':
                     content = note[4].replace('\n', '\\n')
                     keywordsStr = ','.join(keywords[i] for i in range(len(keywords)))
-                    c = {"authorId":note[1], "date":note[2],"title":note[3],"content":content,"privacy":privacy}
+                    c = {"authorId":note[1], "date":date,"due":due,"title":note[3],"content":content,"privacy":privacy}
                     c["keywords"] = keywordsStr
                     rval.append({"json":json.dumps(c)})
                 else:

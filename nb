@@ -340,6 +340,7 @@ else: # By a process of elimination, we must be trying to find notes.
                     print('')
     if args.count:
         print(count)
-    print()
-    print(random_hint())
+    if args.mode != "json":
+        print()
+        print(random_hint())
 
