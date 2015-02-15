@@ -27,8 +27,23 @@ import json
 import os
 import re
 import datetime
+from random import randint, seed
 from time import strptime
 import subprocess
+
+def random_hint():
+    hints = [
+            'To add a note, type "nb -a", which opens an editor', 
+            'To see all notes, type "nb"',
+            'To read notes from a JSON file, type "nb -a -m json < notes.json"',
+            'To store notes into a JSON file, type "nb -m json > notes.json"',
+            'To see all notes in markdown format, type "nb -m markdown"',
+            'To see all notes in json format, type "nb -m json"',
+            'To edit hint e.g. <10>, type "nb 10 -e"',
+            'To see notes with keyword "foo", type "nb -k foo"',
+            'To show e.g. note <10>, type "nb 10"',
+            'To see all notes, one per line, type "nb -p online"']
+    return hints[randint(0, len(hints)-1)]
 
 def get_from_dotfile(file, token, default=""):
     try:
@@ -325,5 +340,6 @@ else: # By a process of elimination, we must be trying to find notes.
                     print('')
     if args.count:
         print(count)
-    
+    print()
+    print(random_hint())
 
