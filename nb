@@ -76,9 +76,10 @@ parser = argparse.ArgumentParser(prog="nb", description="Nota Bene: an organizer
 parser.add_argument('-i', '--id', type=int, help="ID number of note to work with")
 parser.add_argument('-a', "--add", action="store_true", dest="add", default=False, help="add a note")
 parser.add_argument('-e', "--edit", action="store_true", dest="edit", default=False, help="edit a note")
-parser.add_argument('-d', "--delete", action="store_true", dest="delete", default=False, help="delete a note")
+#parser.add_argument('-d', "--delete", action="store_true", dest="delete", default=False, help="delete a note")
+parser.add_argument('-d', "--delete", type=int, default=None, help="delete note numbered N", metavar="N")
 parser.add_argument('-m', '--mode', type=str, default="interactive", choices=['interactive', 'plain', 'json', 'markdown'],
-        help="method for i/o")
+        metavar="mode", help="method for i/o; mode may be 'interactive', 'plain', 'json' or 'markdown'")
 parser.add_argument('-t', "--title", type=str, default="", help="title (short)")
 parser.add_argument("-k", "--keywords", type=str, default="", help="comma-separated keywords")
 parser.add_argument('-c', "--content", type=str, default="", help="content")
@@ -90,7 +91,7 @@ defaultDatabase = get_from_dotfile("~/.nbrc", "db", "~/Dropbox/nb.db")
 parser.add_argument("--db", type=str, default=defaultDatabase, help="filename for database")
 parser.add_argument("--strict", action="store_true", default=False, help="use strict search?")
 parser.add_argument("--due", type=str, default="", help="time when item is due [not used yet]")
-parser.add_argument('-p', "--pretty", type=str, default="", help="format for note output")
+parser.add_argument('-p', "--pretty", type=str, default="", metavar="fmt", help="format for note output")
 parser.add_argument('-v', "--version", action="store_true", dest="version", default=False, help="get version number")
 parser.add_argument("--developer", action="store_true", default=False, help="flag for the developer *only*")
 args = parser.parse_args()
@@ -121,6 +122,12 @@ if args.content:
     content = args.content
 else:
     content = ""
+
+if args.delete:
+    if args.debug:
+        print("should now delete note %d" % args.delete, end="\n")
+    nb.delete(args.delete)
+    sys.exit(0)
 
 if args.add:
     if args.mode == 'json':
@@ -231,14 +238,14 @@ elif args.edit:
     sys.exit(0)
 
 
-elif args.delete:
-    if not id_desired:
-        nb.error("must give a note ID number (shown in <> by 'nb find')")
-        sys.exit(1)
-    if args.debug:
-        nb.fyi("note with id number", id_desired, "should be deleted now")
-    nb.delete(id_desired)
-    sys.exit(0)
+# elif args.delete:
+#     if not id_desired:
+#         nb.error("must give a note ID number (shown in <> by 'nb find')")
+#         sys.exit(1)
+#     if args.debug:
+#         nb.fyi("note with id number", id_desired, "should be deleted now")
+#     nb.delete(id_desired)
+#     sys.exit(0)
 
 
 elif args.developer:
