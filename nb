@@ -297,24 +297,16 @@ else: # By a process of elimination, we must be trying to find notes.
         else:
             if args.pretty == "oneline" and nfound > 1:
                 print("<%s> " %f ['noteId'], end="")
-                print("[", "/".join(f['keywords'][i] for i in range(len(f['keywords']))), "]",end='')
+                print("[", ", ".join(f['keywords'][i] for i in range(len(f['keywords']))), "]",end='')
                 print(" %s" % f['title'])
             else:
                 print("<%s>" % f['noteId'], end='')
-                print("", "[", "/".join(f['keywords'][i] for i in range(len(f['keywords']))), "]",end='\n')
-                print("  %s" % f['title'])
-                print("  {%s / %s} " % (f['date'], f['modified']), end="")
-                #print(" {%s} " % f['date'], end="")
+                print("", "[", ", ".join(f['keywords'][i] for i in range(len(f['keywords']))), "]",end='')
+                print(" %s" % f['date'], end=" ")
                 if f['due'] and len(f['due']) > 0:
                     due = datetime.datetime.strptime(f['due'], '%Y-%m-%d %H:%M:%S.%f') # FIXME: make this 'due' DRY (+-20 lines)
-                    #print " (due %s)" % f['due']
-                    #print "due:", due
                     now = datetime.datetime.now()
-                    #print("\n")
-                    #print ("now:", now)
-                    #print ("due:", due)
                     when = abs(due - now).total_seconds()
-                    #print ("when:", when)
                     if due > now:
                         if when < 2 * 3600:
                             print("(due in %d minutes)" % round(when / 60))
@@ -331,6 +323,7 @@ else: # By a process of elimination, we must be trying to find notes.
                             print("(overdue by %.1f days)" % (when / 3600 / 24))
                 else:
                     print('')
+                print("  %s" % f['title'])
                 content = f['content'].replace('\\n', '\n')
                 if not args.pretty == "twoline":
                     for contentLine in content.split('\n'):
