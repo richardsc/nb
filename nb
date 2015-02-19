@@ -33,16 +33,16 @@ import subprocess
 
 def random_hint():
     hints = [
-            'To add a note, type "nb -a", which opens an editor', 
-            'To see all notes, type "nb"',
-            'To read notes from a JSON file, type "nb -a -m json < notes.json"',
-            'To store notes into a JSON file, type "nb -m json > notes.json"',
-            'To see all notes in markdown format, type "nb -m markdown"',
-            'To see all notes in json format, type "nb -m json"',
-            'To edit hint e.g. <10>, type "nb 10 -e"',
-            'To see notes with keyword "foo", type "nb -k foo"',
-            'To show e.g. note <10>, type "nb 10"',
-            'To see all notes, one per line, type "nb -p online"']
+            'to add a note, type "nb -a", which opens an editor', 
+            'to see all notes, type "nb"',
+            'to read notes from a JSON file, type "nb -a -m json < notes.json"',
+            'to store notes into a JSON file, type "nb -m json > notes.json"',
+            'to see all notes in markdown format, type "nb -m markdown"',
+            'to see all notes in json format, type "nb -m json"',
+            'to edit hint e.g. <10>, type "nb 10 -e"',
+            'to see notes with keyword "foo", type "nb -k foo"',
+            'to show e.g. note <10>, type "nb 10"',
+            'to see all notes, one per line, type "nb -p online"']
     return hints[randint(0, len(hints)-1)]
 
 def get_from_dotfile(file, token, default=""):
@@ -297,13 +297,13 @@ else: # By a process of elimination, we must be trying to find notes.
         else:
             if args.pretty == "oneline" and nfound > 1:
                 print("<%s> " %f ['noteId'], end="")
-                print("[", " ] [ ".join(f['keywords'][i] for i in range(len(f['keywords']))), "]",end='')
-                print(" : %s" % f['title'])
+                print("[", "/".join(f['keywords'][i] for i in range(len(f['keywords']))), "]",end='')
+                print(" %s" % f['title'])
             else:
-                print("%s" % f['title'])
-                print("  ", "[", " ] [ ".join(f['keywords'][i] for i in range(len(f['keywords']))), "]",end='')
-                print(" <%s>" % f['noteId'], end='')
-                print(" {%s / %s} " % (f['date'], f['modified']), end="")
+                print("<%s>" % f['noteId'], end='')
+                print("", "[", "/".join(f['keywords'][i] for i in range(len(f['keywords']))), "]",end='\n')
+                print("  %s" % f['title'])
+                print("  {%s / %s} " % (f['date'], f['modified']), end="")
                 #print(" {%s} " % f['date'], end="")
                 if f['due'] and len(f['due']) > 0:
                     due = datetime.datetime.strptime(f['due'], '%Y-%m-%d %H:%M:%S.%f') # FIXME: make this 'due' DRY (+-20 lines)
@@ -336,11 +336,11 @@ else: # By a process of elimination, we must be trying to find notes.
                     for contentLine in content.split('\n'):
                         c = contentLine.rstrip('\n')
                         if len(c):
-                            print("  ", contentLine.rstrip('\n'))
+                            print("   ", contentLine.rstrip('\n'))
                     print('')
     if args.count:
         print(count)
     if args.mode != "json":
-        print()
+        print("HINT:", end=" ")
         print(random_hint())
 
