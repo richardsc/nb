@@ -208,6 +208,11 @@ class Nb:
                 self.error("There was a problem deleting keyword %s" % key)
         self.con.commit()
 
+    def get_id_list(self):
+        '''Return list of ID values'''
+        noteIds = []
+        noteIds.extend(self.con.execute("SELECT noteId FROM note;"))
+        return(noteIds)
 
     def find(self, id=None, keywords="", mode="plain", strict=False):
         '''Search notes for a given id or keyword, printing the results in

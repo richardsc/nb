@@ -72,7 +72,7 @@ if len(sys.argv) > 1:
 
 parser = argparse.ArgumentParser(prog="nb", description="Nota Bene: an organizer for textual notes", epilog="(In active development)")
 
-parser.add_argument('-i', '--id', type=int, help="ID number of note to work with")
+parser.add_argument('-i', '--id', type=int, help="ID number of note to work with (MAY BE REMOVED)")
 parser.add_argument('-a', "--add", action="store_true", dest="add", default=False, help="add a note")
 parser.add_argument('-e', "--edit", type=int, default=None, help="edit note numbered N", metavar="N")
 parser.add_argument('-d', "--delete", type=int, default=None, help="delete note numbered N", metavar="N")
@@ -260,11 +260,24 @@ elif args.developer:
 
 else: # By a process of elimination, we must be trying to find notes.
     due_requested = nb.interpret_time(args.due)
-    if id_desired:
-        found = nb.find(id=id_desired, mode=args.mode, strict=args.strict)
+    if id_desired is not None:
+        if id_desired == 0:
+            print("should show the most recent note")
+            ids = nb.get_id_list()
+            print(ids)
+            print(len(ids))
+            id = ids[-1 + len(ids)]
+            print("id:", id)
+            found = nb.find(id=int(id), mode=args.mode, strict=args.strict)
+        elif id_desired < 0:
+            print("should show an old note")
+            sys.exit(0)
+        else:
+            found = nb.find(id=id_desired, mode=args.mode, strict=args.strict)
     elif args.keywords[0] != '':
         found = nb.find(keywords=args.keywords, mode=args.mode, strict=args.strict)
     elif args.id:
+        print("args.id case ... is this still working?")
         found = nb.find(id=args.id, mode=args.mode, strict=args.strict)
     else:
         found = nb.find(keywords='?'.split(','), mode=args.mode, strict=args.strict)
