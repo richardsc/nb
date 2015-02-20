@@ -29,20 +29,22 @@ from random import randint, seed
 from time import strptime
 import subprocess
 
+hints = [
+        'to add a note, type "nb -a", which opens an editor', 
+        'to see all notes, type "nb"',
+        'to read notes from a JSON file, type "nb -a -m json < notes.json"',
+        'to store notes into a JSON file, type "nb -m json > notes.json"',
+        'to see all notes in markdown format, type "nb -m markdown"',
+        'to see all notes in json format, type "nb -m json"',
+        'to edit e.g. note <10>, type "nb -e 10"',
+        'to delete e.g. note <10>, type "nb -d 10"',
+        'to see notes with keyword "foo", type "nb -k foo"',
+        'to show e.g. note <10>, type "nb 10"',
+        'to show the latest note, type "nb 0"',
+        'to show the second-latest note, type "nb -1"',
+        'to see all notes, one per line, type "nb -p oneline"']
 def random_hint():
-    hints = [
-            'to add a note, type "nb -a", which opens an editor', 
-            'to see all notes, type "nb"',
-            'to read notes from a JSON file, type "nb -a -m json < notes.json"',
-            'to store notes into a JSON file, type "nb -m json > notes.json"',
-            'to see all notes in markdown format, type "nb -m markdown"',
-            'to see all notes in json format, type "nb -m json"',
-            'to edit e.g. note <10>, type "nb -e 10"',
-            'to delete e.g. note <10>, type "nb -d 10"',
-            'to see notes with keyword "foo", type "nb -k foo"',
-            'to show e.g. note <10>, type "nb 10"',
-            'to see all notes, one per line, type "nb -p oneline"']
-    return hints[randint(0, len(hints)-1)]
+   return hints[randint(0, len(hints)-1)]
 
 def get_from_dotfile(file, token, default=""):
     try:
@@ -72,10 +74,11 @@ if len(sys.argv) > 1:
 
 parser = argparse.ArgumentParser(prog="nb", description="Nota Bene: an organizer for textual notes", epilog="(In active development)")
 
-parser.add_argument('-i', '--id', type=int, help="ID number of note to work with")
+parser.add_argument('-i', '--id', type=int, help="ID number of note to work with (MAY BE REMOVED)")
 parser.add_argument('-a', "--add", action="store_true", dest="add", default=False, help="add a note")
 parser.add_argument('-e', "--edit", type=int, default=None, help="edit note numbered N", metavar="N")
 parser.add_argument('-d', "--delete", type=int, default=None, help="delete note numbered N", metavar="N")
+parser.add_argument('-H', '--Hints', action="store_true", dest="hints", default=False, help="get hints")
 parser.add_argument('-m', '--mode', type=str, default="interactive", choices=['interactive', 'plain', 'json', 'markdown'],
         metavar="mode", help="method for i/o; mode may be 'interactive', 'plain', 'json' or 'markdown'")
 parser.add_argument('-t', "--title", type=str, default="", help="title (short)")
@@ -99,6 +102,10 @@ args.keywords = args.keywords.split(',')
 
 if args.version:
     print(nb.version())
+    sys.exit(0)
+if args.hints:
+    for hint in hints:
+        print(hint)
     sys.exit(0)
 
 # look in ~/.nbrc to see if a database is named there
@@ -260,11 +267,24 @@ elif args.developer:
 
 else: # By a process of elimination, we must be trying to find notes.
     due_requested = nb.interpret_time(args.due)
-    if id_desired:
-        found = nb.find(id=id_desired, mode=args.mode, strict=args.strict)
+    if id_desired is not None:
+        if id_desired <= 0:
+            ids = nb.get_id_list()
+            nids = len(ids)
+            if (id_desired + nids - 1) < 0:
+                print("list only contains %d notes" % nids, end="\n")
+                sys.exit(1)
+            #print(ids)
+            #print(nids)
+            id = ids[nids + id_desired - 1][0]
+            #print("id:", id)
+            found = nb.find(id=int(id), mode=args.mode, strict=args.strict)
+        else:
+            found = nb.find(id=id_desired, mode=args.mode, strict=args.strict)
     elif args.keywords[0] != '':
         found = nb.find(keywords=args.keywords, mode=args.mode, strict=args.strict)
     elif args.id:
+        print("args.id case ... is this still working?")
         found = nb.find(id=args.id, mode=args.mode, strict=args.strict)
     else:
         found = nb.find(keywords='?'.split(','), mode=args.mode, strict=args.strict)
