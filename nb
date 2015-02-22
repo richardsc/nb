@@ -307,6 +307,9 @@ else: # By a process of elimination, we must be trying to find notes.
     #print("hash %s" % args.hash)
     due_requested = nb.interpret_time(args.due)
     if id_desired is not None:
+        if id_desired[0:1] == '-': # don't get confused by arg flags
+            id_desired = None
+    if id_desired is not None:
         if id_desired <= 0:
             ids = nb.get_id_list()
             nids = len(ids)
