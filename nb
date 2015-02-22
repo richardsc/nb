@@ -1,7 +1,15 @@
 #!/usr/bin/python
 
 '''
-There are several ways to use nb.  Try 'nb -h' for some hints.
+
+There are several ways to use nb.  Try 'nb -h' for some hints. 
+
+The ~/.nbrc file may contain e.g. the following:
+      
+    db = "~/Dropbox/nb.db"
+    pretty = "oneline"
+    showID = False      # set True to see database ID numbers in listings
+
 '''
 from __future__ import print_function
 from nbclass import Nb
@@ -37,15 +45,17 @@ def get_from_dotfile(file, token, default=""):
             for line in f.readlines():
                 line = re.sub(r'#.*', r'', line)
                 tokens = line.split("=")
-                tokens = line.split("=")
-                tokens[0] = tokens[0].strip()
-                tokens[1] = tokens[1].strip()
-                tokens[1] = tokens[1].strip('"')
-                if tokens[0] == token:
-                    return(tokens[1])
+                if 2 == len(tokens):
+                    tokens = line.split("=")
+                    tokens[0] = tokens[0].strip()
+                    tokens[1] = tokens[1].strip()
+                    tokens[1] = tokens[1].strip('"')
+                    if tokens[0] == token:
+                        return(tokens[1])
             return(default)
     except:
-        error("cannot open file '%s'" % file, file=sys.stderr)
+        print("cannot open file '%s'" % file, file=sys.stderr)
+        exit(1)
 
 
 # If second arg is a number, it is a noteId
@@ -58,7 +68,6 @@ if len(sys.argv) > 1:
         pass
 
 parser = argparse.ArgumentParser(prog="nb", description="Nota Bene: an organizer for textual notes", epilog="(In active development)")
-
 parser.add_argument("hash", nargs="?", default="", help="abbreviated hash to search for", metavar="hash")
 parser.add_argument('-a', "--add", action="store_true", dest="add", default=False, help="add a note")
 parser.add_argument('-e', "--edit", type=str, default=None, help="edit note with abbreviated hash 'h'", metavar="h")
@@ -74,7 +83,9 @@ parser.add_argument("--count", action="store_true", dest="count", default=False,
 parser.add_argument("--debug", action="store_true", dest="debug", default=False, help="set debugging on")
 parser.add_argument("--privacy", type=int, default=0, help="set privacy level (0=open, 1=closed)", metavar="level")
 parser.add_argument("--file", type=str, help="filename for i/o", metavar="name")
+# Process the dotfile (need for next parser call)
 defaultDatabase = get_from_dotfile("~/.nbrc", "db", "~/Dropbox/nb.db")
+# Back to the parser
 parser.add_argument("--db", type=str, default=defaultDatabase, help="filename for database")
 parser.add_argument("--strict", action="store_true", default=False, help="use strict search?")
 parser.add_argument("--due", type=str, default="", help="time when item is due [not used yet]", metavar="when")
@@ -85,6 +96,12 @@ args = parser.parse_args()
 
 args.keywordsoriginal = args.keywords
 args.keywords = args.keywords.split(',')
+
+showID = get_from_dotfile("~/.nbrc", "showID", False)
+debug = get_from_dotfile("~/.nbrc", "debug", None)
+            
+if not args.debug:
+    args.debug = debug
 
 nb = Nb(debug=args.debug, db=args.db, quiet=args.count)
 
@@ -322,11 +339,15 @@ else: # By a process of elimination, we must be trying to find notes.
         else:
             if args.pretty == "oneline" and nfound > 1:
                 print("%s - " % f['hash'][0:4], end="")
-                print("(%s) " % f['noteId'], end="")
+                if showID:
+                    print("(%s) " % f['noteId'], end="")
                 print("%s " % f['title'], end="")
                 print("[", ", ".join(f['keywords'][i] for i in range(len(f['keywords']))), "]",end='\n')
             else:
-                print("%s - %s" % (f['hash'][0:4], f['title']), end='')
+                print("%s - " % f['hash'][0:4], end="")
+                if showID:
+                    print("(%s) " % f['noteId'], end="")
+                print("%s" % f['title'], end="")
                 print("", "[", ", ".join(f['keywords'][i] for i in range(len(f['keywords']))), "]",end='\n')
                 print("  %s" % f['date'], end=" ")
                 if f['due'] and len(f['due']) > 0:

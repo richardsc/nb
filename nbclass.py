@@ -179,19 +179,28 @@ class Nb:
     def delete(self, id=-1):
         if id < 0:
             self.error("cannot delete a note with a negative id number (%s)" % id)
+        old = self.find(id)
         if self.debug:
-            n = self.cur.execute("SELECT noteId, title FROM note WHERE noteId = ?;", [id])
-            print("Deleting the following note:", n.fetchone())
+            print("old:", old)
+        if (len(old) != 1):
+            self.error("cannot delete %d notes at once" % len(old))
+        id = int(old[0]["noteId"])
+        if self.debug:
+            print("id:", id)
+            print(id)
         try:
+            print("DELETE FROM note WHERE noteId = %s;" % id)
             self.cur.execute("DELETE FROM note WHERE noteId = ?;", [id])
+            self.con.commit()
         except:
             self.error("there is no note numbered %d" % id)
             return False
         try:
             self.cur.execute("DELETE FROM notekeyword WHERE noteId = ?;", [id])
+            self.con.commit()
         except:
             self.error("there was a problem deleting keywords associated with note numbered %d" % id)
-        self.cleanup()
+        #self.cleanup()
         self.con.commit()
         return True
 
@@ -203,12 +212,13 @@ class Nb:
         if 1 != len(old):
             self.error("hash matches %s notes; try adding a character" % len(old))
         old = old[0]
-        print(old)
-        print("noteId %s" % old['noteId'])
-        print("hash %s" % old['hash'])
+        #print(old)
+        #print("noteId %s" % old['noteId'])
+        #print("hash %s" % old['hash'])
+        #print("date %s" % old['date'])
         keywords = []
         keywords.extend(self.get_keywords(old['noteId']))
-        print(keywords)
+        #print(keywords)
         ee = self.editor_entry(title=old['title'], keywords=keywords, content=old['content'], privacy=old['privacy'], due=old['due'])
         # the hash never changes
         idnew = self.add(title=ee["title"], keywords=ee["keywords"], content=ee["content"], privacy=ee["privacy"],
@@ -220,14 +230,14 @@ class Nb:
             self.cur.execute("UPDATE notekeyword SET noteId=? WHERE noteId=?;", (old['noteId'], idnew))
         except:
             self.error("cannot update notekeyword database to reflect reassignment of temporary note %d as %d", (idnew, id))
-        #try:
-        #    if self.debug:
-        #        self.fyi("UPDATE note SET noteId=%d WHERE noteId=%d;" % (old['noteId'], idnew))
-        #    print("OLD id %s" % old['noteId'])
-        #    print("NEW id %s" % idnew)
-        #    self.cur.execute("UPDATE note SET noteId=? WHERE noteId=?;", (old['noteId'], idnew))
-        #except:
-        #    self.error("cannot update note database to reflect reassignment of temporary note %d as %d" % (idnew, old['noteId']))
+        try:
+            if self.debug:
+                self.fyi("UPDATE note SET noteId=%d WHERE noteId=%d;" % (old['noteId'], idnew))
+            print("OLD id %s" % old['noteId'])
+            print("NEW id %s" % idnew)
+            self.cur.execute("UPDATE note SET noteId=? WHERE noteId=?;", (old['noteId'], idnew))
+        except:
+            self.error("cannot update note database to reflect reassignment of temporary note %d as %d" % (idnew, old['noteId']))
         self.con.commit()
         return idnew
 
@@ -259,7 +269,7 @@ class Nb:
         noteIds = []
         if id:
             if self.debug:
-                print("id: %s" % id[0:1])
+                print("self.find() with id=%s" % id)
         if id and "-" != id[0:1]:
             noteIds.append([id])
         else:
@@ -293,7 +303,7 @@ class Nb:
         ## convert from hash to ids. Note that one hash may create several ids.
         noteIds2 = []
         if self.debug:
-            print("ORIGINALLY: %s" % noteIds)
+            print("ORIGINAL noteIds: %s" % noteIds)
         for n in noteIds:
             #print("START n=%s" % n)
             #print("n: %s" % n[0])
@@ -311,7 +321,7 @@ class Nb:
         if len(noteIds2):
             noteIds = noteIds2
         if self.debug:
-            print("LATER: %s" % noteIds)
+            print("LATER noteIds: %s" % noteIds)
         rval = []
         if self.debug:
             print(noteIds)
@@ -452,6 +462,7 @@ CONTENT...
                 inContent = True
         content = content.rstrip('\n')
         keywords = keywords.split(',')
+        print("LATE keywords= %s" % keywords)
         return {"title":title, "keywords":keywords, "content":content, "privacy":privacy, "due":due}
 
     #def find_git_repo(self):
