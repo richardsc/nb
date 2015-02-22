@@ -67,7 +67,7 @@ def get_from_dotfile(file, token, default=""):
 id_desired = None
 if len(sys.argv) > 1:
     try:
-        id_desired = int(sys.argv[1])
+        id_desired = sys.argv[1]
         del sys.argv[1]
     except:
         pass
@@ -100,9 +100,12 @@ args = parser.parse_args()
 args.keywordsoriginal = args.keywords
 args.keywords = args.keywords.split(',')
 
+nb = Nb(debug=args.debug, db=args.db, quiet=args.count)
+
 if args.version:
     print(nb.version())
     sys.exit(0)
+
 if args.hints:
     for hint in hints:
         print(hint)
@@ -112,7 +115,7 @@ if args.hints:
 if not args.pretty:
     args.pretty = get_from_dotfile("~/.nbrc", "pretty", "all")
 
-nb = Nb(debug=args.debug, db=args.db, quiet=args.count)
+#nb = Nb(debug=args.debug, db=args.db, quiet=args.count)
 
 if args.file:
     file = args.file
@@ -284,13 +287,15 @@ else: # By a process of elimination, we must be trying to find notes.
     elif args.keywords[0] != '':
         found = nb.find(keywords=args.keywords, mode=args.mode, strict=args.strict)
     elif args.id:
-        print("args.id case ... is this still working?")
+        print("FIXME: args.id case ... borken, I think (id=%s)" % args.id)
         found = nb.find(id=args.id, mode=args.mode, strict=args.strict)
     else:
         found = nb.find(keywords='?'.split(','), mode=args.mode, strict=args.strict)
     count = 0
     nfound = len(found)
+    i = -1
     for f in found:
+        i = i + 1
         #print(f)
         try:
             due = f['due']
@@ -327,13 +332,13 @@ else: # By a process of elimination, we must be trying to find notes.
             print(f['content'].lstrip())
         else:
             if args.pretty == "oneline" and nfound > 1:
-                print("<%s> " %f ['noteId'], end="")
-                print("[", ", ".join(f['keywords'][i] for i in range(len(f['keywords']))), "]",end='')
-                print(" %s" % f['title'])
+                print("%s - " % f['hash'][0:4], end="")
+                print("%s " % f['title'], end="")
+                print("[", ", ".join(f['keywords'][i] for i in range(len(f['keywords']))), "]",end='\n')
             else:
-                print("<%s>" % f['noteId'], end='')
-                print("", "[", ", ".join(f['keywords'][i] for i in range(len(f['keywords']))), "]",end='')
-                print(" %s" % f['date'], end=" ")
+                print("%s - %s" % (f['hash'][0:4], f['title']), end='')
+                print("", "[", ", ".join(f['keywords'][i] for i in range(len(f['keywords']))), "]",end='\n')
+                print("  %s" % f['date'], end=" ")
                 if f['due'] and len(f['due']) > 0:
                     due = datetime.datetime.strptime(f['due'], '%Y-%m-%d %H:%M:%S.%f') # FIXME: make this 'due' DRY (+-20 lines)
                     now = datetime.datetime.now()
@@ -354,13 +359,12 @@ else: # By a process of elimination, we must be trying to find notes.
                             print("(overdue by %.1f days)" % (when / 3600 / 24))
                 else:
                     print('')
-                print("  %s" % f['title'])
                 content = f['content'].replace('\\n', '\n')
                 if not args.pretty == "twoline":
                     for contentLine in content.split('\n'):
                         c = contentLine.rstrip('\n')
                         if len(c):
-                            print("   ", contentLine.rstrip('\n'))
+                            print(" ", contentLine.rstrip('\n'))
                     print('')
     if args.count:
         print(count)

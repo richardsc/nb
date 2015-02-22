@@ -9,6 +9,7 @@ import difflib
 import re
 import tempfile
 import subprocess
+import hashlib
 
 class Nb:
     def __init__(self, db="nb.db", authorId=1, debug=0, quiet=False):
@@ -37,7 +38,7 @@ class Nb:
         self.cur = con.cursor()
         self.authorId = authorId
         ## 0.3: add note.modified column
-        self.appversion = [0, 3]
+        self.appversion = [0, 4]
         self.dbversion = self.appversion
         if mustInitialize:
             self.initialize()
@@ -71,6 +72,41 @@ class Nb:
                 except:
                     self.error("Problem adding a column named 'modified' to the table named 'note'")
                 self.con.commit()
+            if dbversion < 4:
+                self.fyi("Updating the database from version %d.%d to 0.4" % (self.dbversion[0], self.dbversion[1]))
+                try:
+                    cmd = 'ALTER TABLE note ADD hash DEFAULT "";'
+                    self.fyi(cmd)
+                    self.cur.execute(cmd)
+                    self.con.commit()
+                    cmd = "SELECT noteId,date,title FROM note;"
+                    self.fyi(cmd)
+                    self.cur.execute(cmd)
+                    id = []
+                    hash = []
+                    while True:
+                        row = self.cur.fetchone()
+                        if row == None:
+                            break
+                        #print(row[0])
+                        #print(row[1])
+                        #print(row[2])
+                        id.append(row[0])
+                        h = hashlib.sha256(row[1]+row[2]).hexdigest()
+                        hash.append(h)
+                        #print('id=%s hash=%s' % (row[0], h))
+                    print(id)
+                    print(hash)
+                    for i in range(len(id)):
+                        print("i:", i)
+                        print("UPDATE note SET hash = \"%s\" WHERE noteId=%s;" % (hash[i], id[i]))
+                        self.cur.execute("UPDATE note SET hash = ? WHERE noteId=?;", (hash[i], id[i]))
+                        print("HERE nbclass.py:104")
+                    self.con.commit()
+                    self.fyi("Added a column named 'hash' to the database table named 'note'.")
+                except:
+                    self.error("Problem adding a column named 'hash' to the table named 'note'")
+                self.fyi("well, *will* do that :=")
             try:
                 self.cur.execute("DELETE FROM version;")
                 self.cur.execute("INSERT INTO version(major, minor) VALUES (?,?);",
@@ -104,7 +140,7 @@ class Nb:
         self.cur.execute("CREATE TABLE version(major, minor);")
         self.cur.execute("INSERT INTO version(major, minor) VALUES (?,?);",
                 (self.appversion[0], self.appversion[1]))
-        self.cur.execute("CREATE TABLE note(noteId integer primary key autoincrement, authorId, date, modified, due, title, content, privacy DEFAULT 0);")
+        self.cur.execute("CREATE TABLE note(noteId integer primary key autoincrement, authorId, date, modified, due, title, content, hash, privacy DEFAULT 0);")
         self.cur.execute("CREATE TABLE author(authorId integer primary key autoincrement, name, nickname);")
         self.cur.execute("CREATE TABLE alias(aliasId integer primary key autoincrement, item, alias);")
         self.cur.execute("CREATE TABLE keyword(keywordId integer primary key autoincrement, keyword);")
@@ -123,8 +159,9 @@ class Nb:
         now = datetime.datetime.now()
         if date == "":
             date = now.strftime("%Y-%m-%d %H:%M:%S")
-        self.cur.execute("INSERT INTO note(authorId, date, modified, title, content, privacy, due) VALUES(?, ?, ?, ?, ?, ?, ?);",
-                (self.authorId, date, modified, title, content, privacy, due))
+        hash = hashlib.sha256(date+title)
+        self.cur.execute("INSERT INTO note(authorId, date, modified, title, content, privacy, due, hash) VALUES(?, ?, ?, ?, ?, ?, ?, ?);",
+                (self.authorId, date, modified, title, content, privacy, due, hash))
         noteId = self.cur.lastrowid
         for keyword in keywords:
             keyword = keyword.decode('utf-8')
@@ -142,6 +179,7 @@ class Nb:
                 keywordId = self.cur.lastrowid
             self.con.execute("INSERT INTO notekeyword(noteId, keywordID) VALUES(?, ?)", [noteId, keywordId])
         self.con.commit()
+        print("ERROR: ADD should create a hash")
         return noteId
 
     def delete(self, id=-1):
@@ -167,15 +205,16 @@ class Nb:
         # Edit a note, avoiding code repetition by making a new one and then renumbering it
         if id < 0:
             self.warning("cannot delete a note with a negative id number (%s)" % id)
-        n = self.cur.execute("SELECT title,content,privacy,due,date FROM note WHERE noteId = ?;", [id])
+        n = self.cur.execute("SELECT title,content,privacy,due,date,hash FROM note WHERE noteId = ?;", [id])
         note = n.fetchone()
         if not note:
             self.error("no note number %d" % id)
         keywords = []
         keywords.extend(self.get_keywords(id))
         ee = self.editor_entry(title=note[0], keywords=keywords, content=note[1], privacy=note[2], due=note[3])
+        # the hash never changes
         idnew = self.add(title=ee["title"], keywords=ee["keywords"], content=ee["content"], privacy=ee["privacy"],
-                due=ee["due"], date=note[4], modified=datetime.datetime.now())
+                due=ee["due"], date=note[4], modified=datetime.datetime.now(), hash=note["hash"])
         self.delete(id)
         try:
             if self.debug:
@@ -246,10 +285,30 @@ class Nb:
                     except:
                         self.error("problem finding keyword or note in database")
                         pass
+        ## convert from hash to ids. Note that one hash may create several ids.
+        noteIds2 = []
+        print("ORIGINALLY: %s" % noteIds)
+        for n in noteIds:
+            #print("START n=%s" % n)
+            #print("n: %s" % n[0])
+            if isinstance(n[0], str):
+                print("STR %s" % n)
+                rows = self.cur.execute("SELECT noteId, hash FROM note;").fetchall()
+                #print(rows)
+                l = len(n[0])
+                for r in rows:
+                    if n[0] == r[1][0:l]:
+                        noteIds2.append((r[0],))
+            else:
+                noteIds2.append(n)
+        if len(noteIds2):
+            noteIds = noteIds2
+        print("LATER: %s" % noteIds)
         rval = []
         for n in noteIds:
+            print("check n %s" % n)
             try:
-                note = self.cur.execute("SELECT noteId, authorId, date, title, content, due, privacy, modified FROM note WHERE noteId=?;", n).fetchone()
+                note = self.cur.execute("SELECT noteId, authorId, date, title, content, due, privacy, modified, hash FROM note WHERE noteId=?;", n).fetchone()
             except:
                 self.warning("Problem extracting note from database")
                 next
@@ -270,9 +329,10 @@ class Nb:
                     rval.append({"json":json.dumps(c)})
                 else:
                     rval.append({"noteId":note[0], "title":note[3], "keywords":keywords,
-                        "content":note[4], "due":note[5], "privacy":note[6], "date":note[2], "modified":note[7]})
+                        "content":note[4], "due":note[5], "privacy":note[6],
+                        "date":note[2], "modified":note[7], "hash":note[8]})
             else:
-                self.error("There is no note numbered %d" % int(n[0]))
+                self.error("There is no note with abbreviated hash '%s'" % n[0])
         return rval
 
     def get_keywords(self, id):
