@@ -1,16 +1,4 @@
 #!/usr/bin/python
-
-'''
-
-There are several ways to use nb.  Try 'nb -h' for some hints. 
-
-The ~/.nbrc file may contain e.g. the following:
-      
-    db = "~/Dropbox/nb.db"
-    pretty = "oneline"
-    showID = False      # set True to see database ID numbers in listings
-
-'''
 from __future__ import print_function
 from nbclass import Nb
 import argparse
@@ -18,10 +6,28 @@ import sys
 import json
 import os
 import re
+import textwrap
 import datetime
 from random import randint, seed
 from time import strptime
 import subprocess
+
+summary = '''\
+There are several ways to use nb.  Try 'nb -h' for some hints.  The most common uses are
+
+    nb         # show notes, with first column being hash code
+    nb -k key  # show notes that have the indicated keyword
+    nb ab      # show notes with hash starting with 'ab' (in detail, if only one note)
+    nb -a      # add a note (opens a text editor)
+    nb -e ab   # edit note with abbreviated hash 'ab' (opens a text editor)
+    nb -d ab   # delete note with abbreviated hash 'ab'
+
+The ~/.nbrc file may contain e.g. the following:
+    db = \"~/Dropbox/nb.db\"
+    pretty = \"oneline\"
+    showID = False      # set True to see database ID numbers in listings
+    debug = False       # set True (or use --debug flag) to turn on debugging'''
+
 
 hints = [
         'to add a note, type "nb -a" (which opens an editor)', 
@@ -51,7 +57,12 @@ def get_from_dotfile(file, token, default=""):
                     tokens[1] = tokens[1].strip()
                     tokens[1] = tokens[1].strip('"')
                     if tokens[0] == token:
-                        return(tokens[1])
+                        if tokens[1] == "True":
+                            return True
+                        elif tokens[1] == "False":
+                            return False
+                        else:
+                            return(tokens[1])
             return(default)
     except:
         print("cannot open file '%s'" % file, file=sys.stderr)
@@ -67,7 +78,26 @@ if len(sys.argv) > 1:
     except:
         pass
 
-parser = argparse.ArgumentParser(prog="nb", description="Nota Bene: an organizer for textual notes", epilog="(In active development)")
+showID = get_from_dotfile("~/.nbrc", "showID", False)
+debug = get_from_dotfile("~/.nbrc", "debug", None)
+
+parser = argparse.ArgumentParser(prog="nb", description="Nota Bene: an organizer for textual notes",
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+        epilog=textwrap.dedent('''\
+There are several ways to use nb.  Try 'nb -h' for some hints.  The most common uses are
+
+    nb         # show notes, with first column being hash code
+    nb -k key  # show notes that have the indicated keyword
+    nb ab      # show notes with hash starting with 'ab' (in detail, if only one note)
+    nb -a      # add a note (opens a text editor)
+    nb -e ab   # edit note with abbreviated hash 'ab' (opens a text editor)
+    nb -d ab   # delete note with abbreviated hash 'ab'
+
+The ~/.nbrc file may contain e.g. the following:
+    db = \"~/Dropbox/nb.db\"
+    pretty = \"oneline\"
+    showID = False      # set True to see database ID numbers in listings
+    debug = False       # set True (or use --debug flag) to turn on debugging'''))
 parser.add_argument("hash", nargs="?", default="", help="abbreviated hash to search for", metavar="hash")
 parser.add_argument('-a', "--add", action="store_true", dest="add", default=False, help="add a note")
 parser.add_argument('-e', "--edit", type=str, default=None, help="edit note with abbreviated hash 'h'", metavar="h")
@@ -97,8 +127,8 @@ args = parser.parse_args()
 args.keywordsoriginal = args.keywords
 args.keywords = args.keywords.split(',')
 
-showID = get_from_dotfile("~/.nbrc", "showID", False)
-debug = get_from_dotfile("~/.nbrc", "debug", None)
+#showID = get_from_dotfile("~/.nbrc", "showID", False)
+#debug = get_from_dotfile("~/.nbrc", "debug", None)
             
 if not args.debug:
     args.debug = debug
