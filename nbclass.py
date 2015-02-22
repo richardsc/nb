@@ -207,6 +207,7 @@ class Nb:
         # Edit a note, avoiding code repetition by making a new one and then renumbering it
         if id < 0:
             self.warning("cannot delete a note with a negative id number (%s)" % id)
+        print("id: %s" % id)
         old = self.find(id)
         if 1 != len(old):
             self.error("hash matches %s notes; try adding a character" % len(old))
