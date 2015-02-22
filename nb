@@ -1,21 +1,7 @@
 #!/usr/bin/python
 
 '''
-There are several ways to use nb.
-
-na -a                         # open up an editor to make a new note ('-a' is short for '--add')
-na -a -t "life is grand"      # as above, but preset note title ('-t' is short for '--title')
-na -a -m json < notes.json    # infer notes from a JSON file (ignore other arguments)
-
-nb                            # show all notes
-nb 1                          # show note #1
-nb 1 -m markdown              # show note #1 in markdown format ('-m' is short for '--mode')
-nb -k "lecture"               # show notes with keyword 'lecture' ('-k' is short for '--keyword')
-
-nb -e 10                      # edit note #10 ('-e' is short for '--edit')
-
-nb -d 10                      # delete note #10
-
+There are several ways to use nb.  Try 'nb -h' for some hints.
 '''
 from __future__ import print_function
 from nbclass import Nb
@@ -30,19 +16,18 @@ from time import strptime
 import subprocess
 
 hints = [
-        'to add a note, type "nb -a", which opens an editor', 
+        'to add a note, type "nb -a" (which opens an editor)', 
         'to see all notes, type "nb"',
         'to read notes from a JSON file, type "nb -a -m json < notes.json"',
         'to store notes into a JSON file, type "nb -m json > notes.json"',
         'to see all notes in markdown format, type "nb -m markdown"',
         'to see all notes in json format, type "nb -m json"',
-        'to edit e.g. note <10>, type "nb -e 10"',
-        'to delete e.g. note <10>, type "nb -d 10"',
-        'to see notes with keyword "foo", type "nb -k foo"',
-        'to show e.g. note <10>, type "nb 10"',
-        'to show the latest note, type "nb 0"',
-        'to show the second-latest note, type "nb -1"',
-        'to see all notes, one per line, type "nb -p oneline"']
+        'to edit e.g. note with hash \'ab\', type "nb -e ab" (which opens an editor)',
+        'to delete e.g. note wth has \'ab\', type "nb -d ab"',
+        'to see notes with keyword \'foo\', type "nb -k foo"',
+        'to show e.g. note with hash \'ab\', type "nb ab"',
+        'notes are ordered by time of entry']
+
 def random_hint():
    return hints[randint(0, len(hints)-1)]
 
@@ -68,15 +53,16 @@ id_desired = None
 if len(sys.argv) > 1:
     try:
         id_desired = sys.argv[1]
-        del sys.argv[1]
+        #del sys.argv[1]
     except:
         pass
 
 parser = argparse.ArgumentParser(prog="nb", description="Nota Bene: an organizer for textual notes", epilog="(In active development)")
 
+parser.add_argument("hash", nargs="?", default="", help="abbreviated hash to search for", metavar="hash")
 parser.add_argument('-a', "--add", action="store_true", dest="add", default=False, help="add a note")
-parser.add_argument('-e', "--edit", type=int, default=None, help="edit note numbered N", metavar="N")
-parser.add_argument('-d', "--delete", type=int, default=None, help="delete note numbered N", metavar="N")
+parser.add_argument('-e', "--edit", type=str, default=None, help="edit note with abbreviated hash 'h'", metavar="h")
+parser.add_argument('-d', "--delete", type=str, default=None, help="delete note abbreviated hash 'h'", metavar="h")
 parser.add_argument('-i', '--id', type=int, help="ID number of note to work with (MAY BE REMOVED)")
 parser.add_argument('-H', '--Hints', action="store_true", dest="hints", default=False, help="get hints")
 parser.add_argument('-m', '--mode', type=str, default="interactive", choices=['interactive', 'plain', 'json', 'markdown'],
@@ -115,7 +101,8 @@ if args.hints:
 if not args.pretty:
     args.pretty = get_from_dotfile("~/.nbrc", "pretty", "all")
 
-#nb = Nb(debug=args.debug, db=args.db, quiet=args.count)
+if args.developer:
+    nb.warning("--developer does nothing at the present time")
 
 if args.file:
     file = args.file
@@ -222,12 +209,12 @@ if args.add:
         if args.debug:
             print("should handle interactive now")
         # append repo name ... FIXME: should be a flag controlling whether to do this
-        git_repo = nb.find_git_repo()
-        if git_repo:
-            if len(args.keywords) > 0 and args.keywords[0] != "":
-                args.keywords.insert(0, git_repo.strip())
-            else:
-                args.keywords = [git_repo]
+        #git_repo = nb.find_git_repo()
+        #if git_repo:
+        #    if len(args.keywords) > 0 and args.keywords[0] != "":
+        #        args.keywords.insert(0, git_repo.strip())
+        #    else:
+        #        args.keywords = [git_repo]
         ee = nb.editor_entry(title=args.title, keywords=args.keywords, content=args.content, privacy=args.privacy, due=args.due)
         id = nb.add(title=ee["title"], keywords=ee["keywords"], content=ee["content"], privacy=ee["privacy"], due=ee["due"])
     else:
@@ -262,13 +249,15 @@ if args.add:
 #     sys.exit(0)
 
 
-elif args.developer:
-    repo = nb.find_git_repo()
-    if repo:
-        print("DEVELOPER: in a git repo named: '%s'; maybe we should auto-tag with this?" % repo)
-    sys.exit(0)
+#elif args.developer:
+#    print("--developer does nothing at the present time")
+#    #repo = nb.find_git_repo()
+#    #if repo:
+#    #    print("DEVELOPER: in a git repo named: '%s'; maybe we should auto-tag with this?" % repo)
+#    sys.exit(0)
 
 else: # By a process of elimination, we must be trying to find notes.
+    #print("hash %s" % args.hash)
     due_requested = nb.interpret_time(args.due)
     if id_desired is not None:
         if id_desired <= 0:
@@ -333,6 +322,7 @@ else: # By a process of elimination, we must be trying to find notes.
         else:
             if args.pretty == "oneline" and nfound > 1:
                 print("%s - " % f['hash'][0:4], end="")
+                print("(%s) " % f['noteId'], end="")
                 print("%s " % f['title'], end="")
                 print("[", ", ".join(f['keywords'][i] for i in range(len(f['keywords']))), "]",end='\n')
             else:
