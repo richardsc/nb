@@ -394,6 +394,10 @@ else: # By a process of elimination, we must be trying to find notes.
                     print("(%s) " % f['noteId'], end="")
                 print("%s" % f['title'], end="")
                 print("", "[", ", ".join(f['keywords'][i] for i in range(len(f['keywords']))), "]",end='\n')
+                #this commented-out block shows how to e.g. show just hour of day.
+                #created = f['date']
+                #dan = datetime.datetime.strptime(created, "%Y-%m-%d %H:%M:%S")
+                #print(datetime.datetime.strftime(dan, "%Y-%m-%d %Hh"))
                 print("  created %s" % f['date'], end=" ")
                 if f['due'] and len(f['due']) > 0:
                     due = datetime.datetime.strptime(f['due'], '%Y-%m-%d %H:%M:%S.%f') # FIXME: make this 'due' DRY (+-20 lines)
