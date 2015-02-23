@@ -178,22 +178,26 @@ class Nb:
         try:
             self.cur.execute("DELETE FROM notekeyword WHERE noteid=?", [noteId])
         except:
-            self.error("ERROR: cannot unhook previous keywords since the following failed: 'DELETE FROM notekeyword WHERE noteid=%s'" % noteId)
+            self.error("ERROR: cannot unhook previous keywords")
         # Now, hook up new the entries, one by one.
         for keyword in keywords:
             keyword = keyword.decode('utf-8')
             self.fyi(" inserting keyword:", keyword)
             # Make sure the keyword table contains the word in question.
             keywordId = self.con.execute("SELECT keywordId FROM keyword WHERE keyword = ?;", [keyword]).fetchone()
-            if keywordId:
-                self.fyi("  (existing keyword with id: %s)" % keywordId)
-                keywordId = keywordId[0]
-            else:
-                self.fyi("  (new keyword)")
-                self.cur.execute("INSERT INTO keyword(keyword) VALUES (?);", [keyword])
-                keywordId = self.cur.lastrowid
-            # Finally, do the actual hookup for this word.
-            self.con.execute("INSERT INTO notekeyword(noteId, keywordID) VALUES(?, ?)", [noteId, keywordId])
+            try:
+                if keywordId:
+                    self.fyi("  (existing keyword with id: %s)" % keywordId)
+                    keywordId = keywordId[0]
+                else:
+                    self.fyi("  (new keyword)")
+                    self.cur.execute("INSERT INTO keyword(keyword) VALUES (?);", [keyword])
+                    keywordId = self.cur.lastrowid
+                # Finally, do the actual hookup for this word.
+                self.con.execute("INSERT INTO notekeyword(noteId, keywordID) VALUES(?, ?)", [noteId, keywordId])
+            except:
+                self.error("error hooking up keyword '%s'" % keyword)
+        self.con.commit()
 
     def delete(self, id=-1):
         if id < 0:
@@ -220,46 +224,6 @@ class Nb:
         #self.cleanup()
         self.con.commit()
         return True
-
-    def edit_old(self, id=-1):
-        # Edit a note, avoiding code repetition by making a new one and then renumbering it
-        if id < 0:
-            self.warning("cannot delete a note with a negative id number (%s)" % id)
-        self.fyi("edit() has id: %s" % id)
-        old = self.find(id)
-        if 1 != len(old):
-            self.error("cannot edit %d notes at once; try adding more letters to the hash code" % len(old))
-        old = old[0]
-        #print(old)
-        #print("noteId %s" % old['noteId'])
-        #print("hash %s" % old['hash'])
-        #print("date %s" % old['date'])
-        keywords = []
-        keywords.extend(self.get_keywords(old['noteId']))
-        #print(keywords)
-        ee = self.editor_entry(title=old['title'], keywords=keywords, content=old['content'], privacy=old['privacy'], due=old['due'])
-        # the hash never changes
-        idnew = self.add(title=ee["title"], keywords=ee["keywords"], content=ee["content"], privacy=ee["privacy"],
-                due=ee["due"], date=old['date'], modified=datetime.datetime.now(), hash=old["hash"])
-        try:
-            self.cur.execute("DELETE from note WHERE noteID=?;", [old['noteId']])
-        except:
-            self.error("error trying to delete old version of note (with noteId=%s)" % old['noteId'])
-        try:
-            self.fyi("UPDATE notekeyword SET noteId=%d WHERE noteId=%d;" % (old['noteId'], idnew))
-            self.cur.execute("UPDATE notekeyword SET noteId=? WHERE noteId=?;", (old['noteId'], idnew))
-        except:
-            self.error("cannot update notekeyword database to reflect reassignment of temporary note %d as %d", (idnew, id))
-        try:
-            if self.debug:
-                self.fyi("UPDATE note SET noteId=%d WHERE noteId=%d;" % (old['noteId'], idnew))
-            self.fyi("OLD id %s" % old['noteId'])
-            self.fyi("NEW id %s" % idnew)
-            self.cur.execute("UPDATE note SET noteId=? WHERE noteId=?;", (old['noteId'], idnew))
-        except:
-            self.error("cannot update note database to reflect reassignment of temporary note %d as %d" % (idnew, old['noteId']))
-        self.con.commit()
-        return idnew
 
     def edit(self, id=-1):
         # Edit a note, avoiding code repetition by making a new one and then renumbering it
