@@ -157,23 +157,43 @@ class Nb:
         self.cur.execute("INSERT INTO note(authorId, date, modified, title, content, privacy, due, hash) VALUES(?, ?, ?, ?, ?, ?, ?, ?);",
                 (self.authorId, date, modified, title, content, privacy, due, hash))
         noteId = self.cur.lastrowid
+        # FIXME: replace next with keyword_hookup() call?
         for keyword in keywords:
             keyword = keyword.decode('utf-8')
-            if self.debug:
-                print(" inserting keyword:", keyword)
+            self.fyi(" inserting keyword:", keyword)
             keywordId = self.con.execute("SELECT keywordId FROM keyword WHERE keyword = ?;", [keyword]).fetchone()
             if keywordId:
-                if self.debug:
-                    print("(existing keyword with id:", keywordId, ")")
+                self.fyi("(existing keyword with id %s)" % keywordId)
                 keywordId = keywordId[0]
             else:
-                if self.debug:
-                    print("(new keyword)")
+                self.fyi("(new keyword)")
                 self.cur.execute("INSERT INTO keyword(keyword) VALUES (?);", [keyword])
                 keywordId = self.cur.lastrowid
             self.con.execute("INSERT INTO notekeyword(noteId, keywordID) VALUES(?, ?)", [noteId, keywordId])
         self.con.commit()
         return noteId
+
+    def keyword_hookup(self, noteId, keywords):
+        # Unhook existing cross-linking entries.
+        try:
+            self.cur.execute("DELETE FROM notekeyword WHERE noteid=?", [noteId])
+        except:
+            self.error("ERROR: cannot unhook previous keywords since the following failed: 'DELETE FROM notekeyword WHERE noteid=%s'" % noteId)
+        # Now, hook up new the entries, one by one.
+        for keyword in keywords:
+            keyword = keyword.decode('utf-8')
+            self.fyi(" inserting keyword:", keyword)
+            # Make sure the keyword table contains the word in question.
+            keywordId = self.con.execute("SELECT keywordId FROM keyword WHERE keyword = ?;", [keyword]).fetchone()
+            if keywordId:
+                self.fyi("  (existing keyword with id: %s)" % keywordId)
+                keywordId = keywordId[0]
+            else:
+                self.fyi("  (new keyword)")
+                self.cur.execute("INSERT INTO keyword(keyword) VALUES (?);", [keyword])
+                keywordId = self.cur.lastrowid
+            # Finally, do the actual hookup for this word.
+            self.con.execute("INSERT INTO notekeyword(noteId, keywordID) VALUES(?, ?)", [noteId, keywordId])
 
     def delete(self, id=-1):
         if id < 0:
@@ -182,11 +202,11 @@ class Nb:
         if self.debug:
             print("old:", old)
         if (len(old) != 1):
-            self.error("cannot delete %d notes at once" % len(old))
+            self.error("cannot delete %d notes at once; try adding more letters to the hash code" % len(old))
         id = int(old[0]["noteId"])
         self.fyi("in delete(), id:", id)
         try:
-            print("DELETE FROM note WHERE noteId = %s;" % id)
+            self.fyi("DELETE FROM note WHERE noteId = %s;" % id)
             self.cur.execute("DELETE FROM note WHERE noteId = ?;", [id])
             self.con.commit()
         except:
@@ -208,7 +228,7 @@ class Nb:
         self.fyi("edit() has id: %s" % id)
         old = self.find(id)
         if 1 != len(old):
-            self.error("hash matches %s notes; try adding a character" % len(old))
+            self.error("cannot edit %d notes at once; try adding more letters to the hash code" % len(old))
         old = old[0]
         #print(old)
         #print("noteId %s" % old['noteId'])
@@ -248,20 +268,12 @@ class Nb:
         self.fyi("edit() has id: %s" % id)
         old = self.find(id)
         if 1 != len(old):
-            self.error("hash matches %s notes; try adding a character" % len(old))
+            self.error("cannot edit %d notes at once; try adding more letters to the hash code" % len(old))
         old = old[0]
-        #print(old)
-        #print("noteId %s" % old['noteId'])
-        #print("hash %s" % old['hash'])
-        #print("date %s" % old['date'])
         keywords = []
         keywords.extend(self.get_keywords(old['noteId']))
-        #print(keywords)
         ee = self.editor_entry(title=old['title'], keywords=keywords, content=old['content'], privacy=old['privacy'], due=old['due'])
-        # the hash never changes
         noteId = int(old["noteId"])
-        #idnew = self.add(title=ee["title"], keywords=ee["keywords"], content=ee["content"], privacy=ee["privacy"],
-        #        due=ee["due"], date=old['date'], modified=datetime.datetime.now(), hash=old["hash"])
         try:
             self.cur.execute("UPDATE note SET title = (?) WHERE noteId = ?;", (ee["title"], noteId))
         except:
@@ -270,32 +282,12 @@ class Nb:
             self.cur.execute("UPDATE note SET content = (?) WHERE noteId = ?;", (ee["content"], noteId))
         except:
             self.error("cannot do: UPDATE note SET content = (%s) WHERE noteId = %s;" % (ee["content"], noteId))
-        print("ERROR: not updating keywords")
-        #try:
-        #    self.cur.execute("UPDATE note SET keywords=(?) WHERE noteId=?;", ee["keywords"], noteId)
-        #except:
-        #    self.error("cannot do: UPDATE note SET keywords=(%s) WHERE noteId=%s;" %(ee["keywords"], noteId))
+        self.keyword_hookup(noteId, ee["keywords"])
         if ee["due"] and ee["due"] != "None":
             try:
                 self.cur.execute("UPDATE note SET due=(?) WHERE noteId=?;", (ee["due"], noteId))
             except:
                 self.error("cannot do: UPDATE note SET due=(%s) WHERE noteId=%s;" % (ee["due"], noteId))
-        #try:
-        #    self.cur.execute("DELETE from note WHERE noteID=?;", [old['noteId']])
-        #except:
-        #    self.error("error trying to delete old version of note (with noteId=%s)" % old['noteId'])
-        #try:
-        #    self.fyi("UPDATE notekeyword SET noteId=%d WHERE noteId=%d;" % (old['noteId'], idnew))
-        #    self.cur.execute("UPDATE notekeyword SET noteId=? WHERE noteId=?;", (old['noteId'], idnew))
-        #except:
-        #    self.error("cannot update notekeyword database to reflect reassignment of temporary note %d as %d", (idnew, id))
-        #self.fyi("OLD id %s" % old['noteId'])
-        #self.fyi("NEW id %s" % idnew)
-        #try:
-        #    self.fyi("UPDATE note SET noteId=%d WHERE noteId=%d;" % (old['noteId'], idnew))
-        #    self.cur.execute("UPDATE note SET noteId=? WHERE noteId=?;", (old['noteId'], idnew))
-        #except:
-        #    self.error("cannot update note database to reflect reassignment of temporary note %d as %d" % (idnew, old['noteId']))
         self.con.commit()
         return noteId
 
