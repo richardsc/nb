@@ -287,16 +287,19 @@ class Nb:
         if id and isinstance(id, str) and "-" != id[0:1]:
             noteIds.append([id])
         else:
-            if self.debug:
-                self.fyi("len(keywords) %s" % len(keywords))
+            self.fyi("len(keywords) %s" % len(keywords))
             if 0 == len(keywords) or keywords[0] == "?":
                 noteIds.extend(self.con.execute("SELECT noteId FROM note;"))
             else:
+                self.fyi("looking up keyword...")
                 if not strict:
+                    self.fyi("not strict match")
                     keywordsKnown = []
                     for k in self.cur.execute("SELECT keyword FROM keyword;").fetchall():
                         keywordsKnown.extend(k)
-                    keywordsFuzzy = difflib.get_close_matches(keywords[0], keywordsKnown, n=1, cutoff=0.6) # FIXME: multiple keywords
+                    #print(keywordsKnown)
+                    # FIXME: what cutoff is good??
+                    keywordsFuzzy = difflib.get_close_matches(keywords[0], keywordsKnown, n=1, cutoff=0.4)
                     if len(keywordsFuzzy) > 0:
                         keywords = [keywordsFuzzy[0]]
                 for keyword in keywords:
