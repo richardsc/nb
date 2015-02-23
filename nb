@@ -20,7 +20,7 @@ hints = [
         'to see all notes in markdown format, type "nb -m markdown"',
         'to see all notes in json format, type "nb -m json"',
         'to edit e.g. note with hash \'ab...\', type "nb -e ab" (which opens an editor)',
-        'to delete e.g. note wth hash \'ab...\', type "nb -d ab"',
+        'to delete e.g. note with hash \'ab...\', type "nb -d ab"',
         'to see notes with keyword \'foo\', type "nb -k foo"',
         'to show e.g. note with hash \'ab...\', type "nb ab"',
         'notes are ordered by time of entry']
