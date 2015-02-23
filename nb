@@ -20,7 +20,7 @@ hints = [
         'to see all notes in markdown format, type "nb -m markdown"',
         'to see all notes in json format, type "nb -m json"',
         'to edit e.g. note with hash \'ab...\', type "nb -e ab" (which opens an editor)',
-        'to delete e.g. note wth hash \'ab...\', type "nb -d ab"',
+        'to delete e.g. note with hash \'ab...\', type "nb -d ab"',
         'to see notes with keyword \'foo\', type "nb -k foo"',
         'to show e.g. note with hash \'ab...\', type "nb ab"',
         'notes are ordered by time of entry']
@@ -383,17 +383,21 @@ else: # By a process of elimination, we must be trying to find notes.
             print(f['content'].lstrip())
         else:
             if args.pretty == "oneline" and nfound > 1:
-                print("#%s " % hash[i], end="")
+                print("%s: " % hash[i], end="")
                 if showID:
                     print("(%s) " % f['noteId'], end="")
                 print("%s " % f['title'], end="")
                 print("[", ", ".join(f['keywords'][i] for i in range(len(f['keywords']))), "]",end='\n')
             else:
-                print("#%s " % hash[i], end="")
+                print("%s: " % hash[i], end="")
                 if showID:
                     print("(%s) " % f['noteId'], end="")
                 print("%s" % f['title'], end="")
                 print("", "[", ", ".join(f['keywords'][i] for i in range(len(f['keywords']))), "]",end='\n')
+                #this commented-out block shows how to e.g. show just hour of day.
+                #created = f['date']
+                #dan = datetime.datetime.strptime(created, "%Y-%m-%d %H:%M:%S")
+                #print(datetime.datetime.strftime(dan, "%Y-%m-%d %Hh"))
                 print("  created %s" % f['date'], end=" ")
                 if f['due'] and len(f['due']) > 0:
                     due = datetime.datetime.strptime(f['due'], '%Y-%m-%d %H:%M:%S.%f') # FIXME: make this 'due' DRY (+-20 lines)

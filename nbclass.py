@@ -249,9 +249,10 @@ class Nb:
         self.keyword_hookup(noteId, ee["keywords"])
         if ee["due"] and ee["due"] != "None":
             try:
-                self.cur.execute("UPDATE note SET due=(?) WHERE noteId=?;", (ee["due"], noteId))
+                due = self.interpret_time(ee["due"])[0]
+                self.cur.execute("UPDATE note SET due=(?) WHERE noteId=?;", (due, noteId))
             except:
-                self.error("cannot do: UPDATE note SET due=(%s) WHERE noteId=%s;" % (ee["due"], noteId))
+                self.error("cannot update the 'due' date")
         self.con.commit()
         return noteId
 
@@ -286,16 +287,19 @@ class Nb:
         if id and isinstance(id, str) and "-" != id[0:1]:
             noteIds.append([id])
         else:
-            if self.debug:
-                self.fyi("len(keywords) %s" % len(keywords))
+            self.fyi("len(keywords) %s" % len(keywords))
             if 0 == len(keywords) or keywords[0] == "?":
                 noteIds.extend(self.con.execute("SELECT noteId FROM note;"))
             else:
+                self.fyi("looking up keyword...")
                 if not strict:
+                    self.fyi("not strict match")
                     keywordsKnown = []
                     for k in self.cur.execute("SELECT keyword FROM keyword;").fetchall():
                         keywordsKnown.extend(k)
-                    keywordsFuzzy = difflib.get_close_matches(keywords[0], keywordsKnown, n=1, cutoff=0.6) # FIXME: multiple keywords
+                    #print(keywordsKnown)
+                    # FIXME: what cutoff is good??
+                    keywordsFuzzy = difflib.get_close_matches(keywords[0], keywordsKnown, n=1, cutoff=0.4)
                     if len(keywordsFuzzy) > 0:
                         keywords = [keywordsFuzzy[0]]
                 for keyword in keywords:
@@ -383,7 +387,7 @@ class Nb:
         now = datetime.datetime.now()
         sperday = 86400
         if due == "today":
-            due = (now, sperday)
+            due = (now + datetime.timedelta(hours=8), sperday/24)
         elif due == "tomorrow":
             due = (now + datetime.timedelta(days=1), sperday)
         else:
@@ -400,9 +404,12 @@ class Nb:
                     if test:
                         due = (now + datetime.timedelta(weeks=int(test.group(1))), sperday*7)
                     else:
-                        due = (None, None)
-        if self.debug:
-            self.fyi("due '%s'; tolerance '%s'" % (due[0], due[1]))
+                        test = re.compile(r'(\d+)([ ]*month)(s*)').match(due)
+                        if test:
+                            due = (now + datetime.timedelta(weeks=4*int(test.group(1))), sperday*7)
+                        else:
+                            due = (None, None)
+        self.fyi("due '%s'; tolerance '%s'" % (due[0], due[1]))
         return due
 
 
@@ -412,7 +419,10 @@ class Nb:
             now = datetime.datetime.now()
             #print("due: %s" % due)
             #print(due)
-            DUE = datetime.datetime.strptime(due, "%Y-%m-%d %H:%M:%S.%f")
+            try:
+                DUE = datetime.datetime.strptime(due, "%Y-%m-%d %H:%M:%S.%f")
+            except:
+                DUE = now
             remaining = (DUE - now).total_seconds()
             #print("remaining: %s" % remaining)
             if (abs(remaining) < 86400):
