@@ -337,10 +337,14 @@ else: # By a process of elimination, we must be trying to find notes.
     count = 0
     nfound = len(found)
     i = -1
+    # Single hashes are printed to 7 chars (like on github), but multiple ones are shortened.
     hash = []
     for f in found:
         hash.append(f["hash"])
-    hash = shorten_hash(hash)
+    if len(hash) > 1:
+        hash = shorten_hash(hash)
+    else:
+        hash[0] = hash[0][0:7]
     for f in found:
         i = i + 1
         #print(f)
@@ -379,18 +383,18 @@ else: # By a process of elimination, we must be trying to find notes.
             print(f['content'].lstrip())
         else:
             if args.pretty == "oneline" and nfound > 1:
-                print("%s - " % hash[i], end="")
+                print("#%s " % hash[i], end="")
                 if showID:
                     print("(%s) " % f['noteId'], end="")
                 print("%s " % f['title'], end="")
                 print("[", ", ".join(f['keywords'][i] for i in range(len(f['keywords']))), "]",end='\n')
             else:
-                print("%s - " % hash[i], end="")
+                print("#%s " % hash[i], end="")
                 if showID:
                     print("(%s) " % f['noteId'], end="")
                 print("%s" % f['title'], end="")
                 print("", "[", ", ".join(f['keywords'][i] for i in range(len(f['keywords']))), "]",end='\n')
-                print("  %s" % f['date'], end=" ")
+                print("  created %s" % f['date'], end=" ")
                 if f['due'] and len(f['due']) > 0:
                     due = datetime.datetime.strptime(f['due'], '%Y-%m-%d %H:%M:%S.%f') # FIXME: make this 'due' DRY (+-20 lines)
                     now = datetime.datetime.now()
