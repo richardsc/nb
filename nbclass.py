@@ -184,9 +184,7 @@ class Nb:
         if (len(old) != 1):
             self.error("cannot delete %d notes at once" % len(old))
         id = int(old[0]["noteId"])
-        if self.debug:
-            print("id:", id)
-            print(id)
+        self.fyi("in delete(), id:", id)
         try:
             print("DELETE FROM note WHERE noteId = %s;" % id)
             self.cur.execute("DELETE FROM note WHERE noteId = ?;", [id])
@@ -207,7 +205,7 @@ class Nb:
         # Edit a note, avoiding code repetition by making a new one and then renumbering it
         if id < 0:
             self.warning("cannot delete a note with a negative id number (%s)" % id)
-        print("id: %s" % id)
+        self.fyi("edit() has id: %s" % id)
         old = self.find(id)
         if 1 != len(old):
             self.error("hash matches %s notes; try adding a character" % len(old))
@@ -223,7 +221,10 @@ class Nb:
         # the hash never changes
         idnew = self.add(title=ee["title"], keywords=ee["keywords"], content=ee["content"], privacy=ee["privacy"],
                 due=ee["due"], date=old['date'], modified=datetime.datetime.now(), hash=old["hash"])
-        self.delete(old['noteId'])
+        try:
+            self.cur.execute("DELETE from note WHERE noteID=?;", [old['noteId']])
+        except:
+            self.error("error trying to delete old version of note (with noteId=%s)" % old['noteId'])
         try:
             self.fyi("UPDATE notekeyword SET noteId=%d WHERE noteId=%d;" % (old['noteId'], idnew))
             self.cur.execute("UPDATE notekeyword SET noteId=? WHERE noteId=?;", (old['noteId'], idnew))
@@ -232,8 +233,8 @@ class Nb:
         try:
             if self.debug:
                 self.fyi("UPDATE note SET noteId=%d WHERE noteId=%d;" % (old['noteId'], idnew))
-            print("OLD id %s" % old['noteId'])
-            print("NEW id %s" % idnew)
+            self.fyi("OLD id %s" % old['noteId'])
+            self.fyi("NEW id %s" % idnew)
             self.cur.execute("UPDATE note SET noteId=? WHERE noteId=?;", (old['noteId'], idnew))
         except:
             self.error("cannot update note database to reflect reassignment of temporary note %d as %d" % (idnew, old['noteId']))
@@ -268,7 +269,7 @@ class Nb:
         noteIds = []
         if id:
             self.fyi("self.find() with id=%s" % id)
-        if id and "-" != id[0:1]:
+        if id and isinstance(id, str) and "-" != id[0:1]:
             noteIds.append([id])
         else:
             if self.debug:
@@ -457,7 +458,7 @@ CONTENT...
                 inContent = True
         content = content.rstrip('\n')
         keywords = keywords.split(',')
-        print("LATE keywords= %s" % keywords)
+        self.fyi("LATE keywords= %s" % keywords)
         return {"title":title, "keywords":keywords, "content":content, "privacy":privacy, "due":due}
 
     #def find_git_repo(self):
