@@ -201,7 +201,7 @@ class Nb:
         self.con.commit()
         return True
 
-    def edit(self, id=-1):
+    def edit_old(self, id=-1):
         # Edit a note, avoiding code repetition by making a new one and then renumbering it
         if id < 0:
             self.warning("cannot delete a note with a negative id number (%s)" % id)
@@ -240,6 +240,64 @@ class Nb:
             self.error("cannot update note database to reflect reassignment of temporary note %d as %d" % (idnew, old['noteId']))
         self.con.commit()
         return idnew
+
+    def edit(self, id=-1):
+        # Edit a note, avoiding code repetition by making a new one and then renumbering it
+        if id < 0:
+            self.warning("cannot delete a note with a negative id number (%s)" % id)
+        self.fyi("edit() has id: %s" % id)
+        old = self.find(id)
+        if 1 != len(old):
+            self.error("hash matches %s notes; try adding a character" % len(old))
+        old = old[0]
+        #print(old)
+        #print("noteId %s" % old['noteId'])
+        #print("hash %s" % old['hash'])
+        #print("date %s" % old['date'])
+        keywords = []
+        keywords.extend(self.get_keywords(old['noteId']))
+        #print(keywords)
+        ee = self.editor_entry(title=old['title'], keywords=keywords, content=old['content'], privacy=old['privacy'], due=old['due'])
+        # the hash never changes
+        noteId = int(old["noteId"])
+        #idnew = self.add(title=ee["title"], keywords=ee["keywords"], content=ee["content"], privacy=ee["privacy"],
+        #        due=ee["due"], date=old['date'], modified=datetime.datetime.now(), hash=old["hash"])
+        try:
+            self.cur.execute("UPDATE note SET title = (?) WHERE noteId = ?;", (ee["title"], noteId))
+        except:
+            self.error("cannot do: UPDATE note SET title = (%s) WHERE noteId = %s;" % (ee["title"], noteId))
+        try:
+            self.cur.execute("UPDATE note SET content = (?) WHERE noteId = ?;", (ee["content"], noteId))
+        except:
+            self.error("cannot do: UPDATE note SET content = (%s) WHERE noteId = %s;" % (ee["content"], noteId))
+        print("ERROR: not updating keywords")
+        #try:
+        #    self.cur.execute("UPDATE note SET keywords=(?) WHERE noteId=?;", ee["keywords"], noteId)
+        #except:
+        #    self.error("cannot do: UPDATE note SET keywords=(%s) WHERE noteId=%s;" %(ee["keywords"], noteId))
+        if ee["due"] and ee["due"] != "None":
+            try:
+                self.cur.execute("UPDATE note SET due=(?) WHERE noteId=?;", (ee["due"], noteId))
+            except:
+                self.error("cannot do: UPDATE note SET due=(%s) WHERE noteId=%s;" % (ee["due"], noteId))
+        #try:
+        #    self.cur.execute("DELETE from note WHERE noteID=?;", [old['noteId']])
+        #except:
+        #    self.error("error trying to delete old version of note (with noteId=%s)" % old['noteId'])
+        #try:
+        #    self.fyi("UPDATE notekeyword SET noteId=%d WHERE noteId=%d;" % (old['noteId'], idnew))
+        #    self.cur.execute("UPDATE notekeyword SET noteId=? WHERE noteId=?;", (old['noteId'], idnew))
+        #except:
+        #    self.error("cannot update notekeyword database to reflect reassignment of temporary note %d as %d", (idnew, id))
+        #self.fyi("OLD id %s" % old['noteId'])
+        #self.fyi("NEW id %s" % idnew)
+        #try:
+        #    self.fyi("UPDATE note SET noteId=%d WHERE noteId=%d;" % (old['noteId'], idnew))
+        #    self.cur.execute("UPDATE note SET noteId=? WHERE noteId=?;", (old['noteId'], idnew))
+        #except:
+        #    self.error("cannot update note database to reflect reassignment of temporary note %d as %d" % (idnew, old['noteId']))
+        self.con.commit()
+        return noteId
 
     def cleanup(self):
         ''' Clean up the database, e.g. removing unused keywords.'''
@@ -474,8 +532,7 @@ CONTENT...
     #        return None
    
     def rename_keyword(self, old, new):
-        if self.debug:
-            self.fyi("UPDATE keyword SET keyword=\"%s\" WHERE keyword=\"%s\";" % (new, old))
+        self.fyi("UPDATE keyword SET keyword=\"%s\" WHERE keyword=\"%s\";" % (new, old))
         try:
             self.cur.execute("UPDATE keyword SET keyword = ? WHERE keyword = ?;", (new, old))
         except:
