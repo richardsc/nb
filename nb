@@ -383,13 +383,13 @@ else: # By a process of elimination, we must be trying to find notes.
             print(f['content'].lstrip())
         else:
             if args.pretty == "oneline" and nfound > 1:
-                print("#%s " % hash[i], end="")
+                print("%s: " % hash[i], end="")
                 if showID:
                     print("(%s) " % f['noteId'], end="")
                 print("%s " % f['title'], end="")
                 print("[", ", ".join(f['keywords'][i] for i in range(len(f['keywords']))), "]",end='\n')
             else:
-                print("#%s " % hash[i], end="")
+                print("%s: " % hash[i], end="")
                 if showID:
                     print("(%s) " % f['noteId'], end="")
                 print("%s" % f['title'], end="")
