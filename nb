@@ -313,7 +313,6 @@ if args.add:
 
 
 else: # By a process of elimination, we must be trying to find notes.
-    #print("hash %s" % args.hash)
     due_requested = nb.interpret_time(args.due)
     if id_desired is not None:
         if id_desired[0:1] == '-': # don't get confused by arg flags
@@ -335,7 +334,7 @@ else: # By a process of elimination, we must be trying to find notes.
     elif args.keywords[0] != '':
         found = nb.find(keywords=args.keywords, mode=args.mode, strict=args.strict)
     elif args.id:
-        print("FIXME: args.id case ... borken, I think (id=%s)" % args.id)
+        print("FIXME: args.id case ... broken, I think (id=%s)" % args.id)
         found = nb.find(id=args.id, mode=args.mode, strict=args.strict)
     else:
         found = nb.find(keywords='?'.split(','), mode=args.mode, strict=args.strict)
@@ -347,6 +346,8 @@ else: # By a process of elimination, we must be trying to find notes.
     hash = []
     if nfound > 1:
         for f in found:
+            if args.debug:
+                print("hash %s" % f['hash'])
             hash.append(f['hash'][0:hal])
     elif nfound == 1:
         for f in found:
@@ -354,6 +355,8 @@ else: # By a process of elimination, we must be trying to find notes.
     else:
         print("no notes")
         found = []
+    if args.debug:
+        print(hash)
     for f in found:
         i = i + 1
         #print(f)
@@ -392,7 +395,7 @@ else: # By a process of elimination, we must be trying to find notes.
             print(f['content'].lstrip())
         else:
             if args.pretty == "oneline" and nfound > 1:
-                print(color.hash + ("%s: " % hash[i]) + color.normal, end="")
+                print(color.hash + "%s: " % f['hash'][0:hal] + color.normal, end="")
                 if show_id:
                     print("(%s) " % f['noteId'], end="")
                 print(color.title + "%s" % f['title'] + color.normal + " ", end="")
