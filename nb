@@ -343,8 +343,11 @@ else: # By a process of elimination, we must be trying to find notes.
         hash.append(f["hash"])
     if len(hash) > 1:
         hash = shorten_hash(hash)
-    else:
+    elif len(hash) == 1:
         hash[0] = hash[0][0:7]
+    else:
+        print("no notes")
+        found = []
     for f in found:
         i = i + 1
         #print(f)
