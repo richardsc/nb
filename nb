@@ -387,8 +387,9 @@ else: # By a process of elimination, we must be trying to find notes.
         elif args.mode == "json":
             print(f['json'])
         elif args.mode== 'markdown':
+            ## FIXME: redo this as the interactive UI firms up
             print("**%s**\n" %f ['title'])
-            print("<%s> " %f ['noteId'], end='')
+            print("%s " %f ['hash'], end='')
             for k in f['keywords']:
                 print("[%s] " % k, end='')
             print("{%s / %s}\n" % (f['date'], f['modified']))
@@ -407,7 +408,7 @@ else: # By a process of elimination, we must be trying to find notes.
                         print(", ", end="")
                 print("]", end="\n")
             else:
-                print(color.hash + "%s: " % hash[i] + color.normal, end="")
+                print(color.hash + "%s: " % f['hash'][0:7] + color.normal, end="")
                 if show_id:
                     print("(%s) " % f['noteId'], end="")
                 print(color.title + "%s" % f['title'] + color.normal + " ", end="")
