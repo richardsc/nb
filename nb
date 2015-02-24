@@ -99,6 +99,9 @@ following:
     showID = False         # set True to see database ID numbers in listings
     debug = False          # set True (or use --debug flag) to turn on debugging
     colourize = True       # set False to avoid colours (optionally customized as below)
+                           # Colours (as below) are specified with just the suffix part,
+                           # e.g. "36m" stands for "\\033[36m". To learn about colours,
+                           # see e.g.  http://en.wikipedia.org/wiki/ANSI_escape_code
     colours.hash = "36m"   # darkcyan
     colours.title = "1m"   # bold
     colours.keyword = "4m" # underline
