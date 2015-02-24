@@ -25,25 +25,6 @@ hints = [
         'to show e.g. note with hash \'ab...\', type "nb ab"',
         'notes are ordered by time of entry']
 
-def shorten_hash(hash):
-    n = len(hash)
-    for nc in range(1, 20): # cannot imagine getting longer than 6, really
-        h = hash[:]
-        for i in range(n):
-            h[i] = h[i][0:nc]
-        hs = sorted(h)
-        duplicate = False
-        for i in range(n-1):
-            if hs[i] == hs[i+1]:
-                duplicate = True
-                break
-        if not duplicate:
-            h = hash[:]
-            for i in range(n):
-                h[i] = h[i][0:nc]
-            return(h)
-    return(hash)
-
 def random_hint():
    return hints[randint(0, len(hints)-1)]
 
@@ -82,6 +63,21 @@ if len(sys.argv) > 1:
 
 showID = get_from_dotfile("~/.nbrc", "showID", False)
 debug = get_from_dotfile("~/.nbrc", "debug", None)
+colourize = get_from_dotfile("~/.nbrc", "colourize", True)
+class colours:
+    hash = '\033[36m'   # darkcyan
+    title = '\033[1m'   # bold
+    keyword = '\033[4m' # underline
+    normal = '\033[0m' # black
+if colourize:
+    colours.hash = '\033[' + get_from_dotfile("~/.nbrc", "colours.hash", '36m') # darkcyan
+    colours.title = '\033[' + get_from_dotfile("~/.nbrc", "colours.title", '1m') # bold
+    colours.keyword = '\033[' + get_from_dotfile("~/.nbrc", "colours.keyword", '4m') # underline
+else:
+    colours.hash = ''
+    colours.title = ''
+    colours.keyword = ''
+    colours.normal = ""
 
 parser = argparse.ArgumentParser(prog="nb", description="Nota Bene: an organizer for textual notes",
         formatter_class=argparse.RawDescriptionHelpFormatter,
@@ -100,8 +96,14 @@ following:
 
     db = \"~/Dropbox/nb.db\"
     pretty = \"oneline\"
-    showID = False      # set True to see database ID numbers in listings
-    debug = False       # set True (or use --debug flag) to turn on debugging'''))
+    showID = False         # set True to see database ID numbers in listings
+    debug = False          # set True (or use --debug flag) to turn on debugging
+    colourize = True       # set False to avoid colours (optionally customized as below)
+    colours.hash = "36m"   # darkcyan
+    colours.title = "1m"   # bold
+    colours.keyword = "4m" # underline
+    '''))
+
 parser.add_argument("hash", nargs="?", default="", help="abbreviated hash to search for", metavar="hash")
 parser.add_argument('-a', "--add", action="store_true", dest="add", default=False, help="add a note")
 parser.add_argument('-e', "--edit", type=str, default=None, help="edit note with abbreviated hash 'h'", metavar="h")
@@ -259,13 +261,6 @@ if args.add:
     elif args.mode == 'interactive' and (args.title == "" or args.content == "" or args.keywords == ""):
         if args.debug:
             print("should handle interactive now")
-        # append repo name ... FIXME: should be a flag controlling whether to do this
-        #git_repo = nb.find_git_repo()
-        #if git_repo:
-        #    if len(args.keywords) > 0 and args.keywords[0] != "":
-        #        args.keywords.insert(0, git_repo.strip())
-        #    else:
-        #        args.keywords = [git_repo]
         ee = nb.editor_entry(title=args.title, keywords=args.keywords, content=args.content, privacy=args.privacy, due=args.due)
         id = nb.add(title=ee["title"], keywords=ee["keywords"], content=ee["content"], privacy=ee["privacy"], due=ee["due"])
     else:
@@ -289,23 +284,6 @@ if args.add:
 #        idnew = nb.edit(id_desired)
 #    sys.exit(0)
 
-
-# elif args.delete:
-#     if not id_desired:
-#         nb.error("must give a note ID number (shown in <> by 'nb find')")
-#         sys.exit(1)
-#     if args.debug:
-#         nb.fyi("note with id number", id_desired, "should be deleted now")
-#     nb.delete(id_desired)
-#     sys.exit(0)
-
-
-#elif args.developer:
-#    print("--developer does nothing at the present time")
-#    #repo = nb.find_git_repo()
-#    #if repo:
-#    #    print("DEVELOPER: in a git repo named: '%s'; maybe we should auto-tag with this?" % repo)
-#    sys.exit(0)
 
 else: # By a process of elimination, we must be trying to find notes.
     #print("hash %s" % args.hash)
@@ -338,13 +316,17 @@ else: # By a process of elimination, we must be trying to find notes.
     nfound = len(found)
     i = -1
     # Single hashes are printed to 7 chars (like on github), but multiple ones are shortened.
+    hal = nb.hash_abbreviation_length()
     hash = []
-    for f in found:
-        hash.append(f["hash"])
-    if len(hash) > 1:
-        hash = shorten_hash(hash)
+    if nfound > 1:
+        for f in found:
+            hash.append(f['hash'][0:hal])
+    elif nfound == 1:
+        for f in found:
+            hash.append(f['hash'][0:7])
     else:
-        hash[0] = hash[0][0:7]
+        print("no notes")
+        found = []
     for f in found:
         i = i + 1
         #print(f)
@@ -383,16 +365,17 @@ else: # By a process of elimination, we must be trying to find notes.
             print(f['content'].lstrip())
         else:
             if args.pretty == "oneline" and nfound > 1:
-                print("%s: " % hash[i], end="")
+                print(colours.hash + ("%s: " % hash[i]) + colours.normal, end="")
                 if showID:
                     print("(%s) " % f['noteId'], end="")
-                print("%s " % f['title'], end="")
+                print(colours.title + "%s " % f['title'] + colours.normal, end="")
+                # FIXME: colours.keyword is being ignored
                 print("[", ", ".join(f['keywords'][i] for i in range(len(f['keywords']))), "]",end='\n')
             else:
-                print("%s: " % hash[i], end="")
+                print(colours.hash + "%s: " % hash[i] + colours.normal, end="")
                 if showID:
                     print("(%s) " % f['noteId'], end="")
-                print("%s" % f['title'], end="")
+                print(colours.title + "%s" % f['title'] + colours.normal, end="")
                 print("", "[", ", ".join(f['keywords'][i] for i in range(len(f['keywords']))), "]",end='\n')
                 #this commented-out block shows how to e.g. show just hour of day.
                 #created = f['date']
