@@ -338,13 +338,14 @@ else: # By a process of elimination, we must be trying to find notes.
     nfound = len(found)
     i = -1
     # Single hashes are printed to 7 chars (like on github), but multiple ones are shortened.
+    hal = nb.hash_abbreviation_length()
     hash = []
-    for f in found:
-        hash.append(f["hash"])
-    if len(hash) > 1:
-        hash = shorten_hash(hash)
-    elif len(hash) == 1:
-        hash[0] = hash[0][0:7]
+    if nfound > 1:
+        for f in found:
+            hash.append(f['hash'][0:hal])
+    elif nfound == 1:
+        for f in found:
+            hash.append(f['hash'][0:7])
     else:
         print("no notes")
         found = []

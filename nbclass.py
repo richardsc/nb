@@ -173,6 +173,33 @@ class Nb:
         self.con.commit()
         return noteId
 
+
+    def hash_abbreviation_length(self):
+        hash = []
+        try:
+            # FIXME: this does not seem elegant
+            for h in self.cur.execute("SELECT hash FROM note;").fetchall():
+                hash.extend(h)
+        except:
+            self.error("ERROR: cannot find hashes")
+        n = len(hash)
+        for nc in range(1, 20): # unlikely to be > 7
+            #print("nc: %s" % nc)
+            h = hash[:]
+            for i in range(n):
+                h[i] = h[i][0:nc]
+                #print("hash[%d] %s %s (nc=%d)" % (i, h[i], hash[i], nc))
+            hs = sorted(h)
+            duplicate = False
+            for i in range(n-1):
+                if hs[i] == hs[i+1]:
+                    duplicate = True
+                    break
+            if not duplicate:
+                break
+        return(nc)
+
+
     def keyword_hookup(self, noteId, keywords):
         # Unhook existing cross-linking entries.
         try:
