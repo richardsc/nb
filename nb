@@ -61,23 +61,45 @@ if len(sys.argv) > 1:
     except:
         pass
 
-showID = get_from_dotfile("~/.nbrc", "showID", False)
+show_id = get_from_dotfile("~/.nbrc", "show_id", False)
 debug = get_from_dotfile("~/.nbrc", "debug", None)
-colourize = get_from_dotfile("~/.nbrc", "colourize", True)
-class colours:
-    hash = '\033[36m'   # darkcyan
+
+# Handle color scheme
+class color:
+    hash = '\033[33m'   # yellow [git hash color]
     title = '\033[1m'   # bold
-    keyword = '\033[4m' # underline
+    keyword = '\033[4m' # darkcyan [git '@@' color]
     normal = '\033[0m' # black
-if colourize:
-    colours.hash = '\033[' + get_from_dotfile("~/.nbrc", "colours.hash", '36m') # darkcyan
-    colours.title = '\033[' + get_from_dotfile("~/.nbrc", "colours.title", '1m') # bold
-    colours.keyword = '\033[' + get_from_dotfile("~/.nbrc", "colours.keyword", '4m') # underline
+color_scheme = get_from_dotfile("~/.nbrc", "color", True)
+if isinstance(color_scheme, str):
+    if color_scheme == "dk1":
+        color.hash = '\033[' + '32m' # green
+        color.title = '\033[' + '1m' # bold
+        #color.keyword = '\033[' + '4m' # underline
+        color.keyword = '\033[' + '33m' # yellow (like commit hash from git)
+    elif color_scheme == "cr1":
+        color.hash = '\033[' + '31m' # red 
+        color.title = '\033[' + '1m' # bold
+        color.keyword = '\033[' + '4m' # underline
+    else:
+       print("Unknown color scheme color=\"%s\" specified in ~/.nrbc file." % color_scheme) 
+       exit(1)
+    use_color = True
+elif isinstance(color_scheme, bool):
+    use_color = color_scheme
+    if use_color:
+        color.hash = '\033[' + get_from_dotfile("~/.nbrc", "color.hash", '33m') # darkcyan
+        color.title = '\033[' + get_from_dotfile("~/.nbrc", "color.title", '1m') # bold
+        color.keyword = '\033[' + get_from_dotfile("~/.nbrc", "color.keyword", '4m') # underline
 else:
-    colours.hash = ''
-    colours.title = ''
-    colours.keyword = ''
-    colours.normal = ""
+    print("The color scheme given in the ~/.nbrc file should be a string or logical")
+    exit(1)
+
+if not use_color:
+    color.hash = ''
+    color.title = ''
+    color.keyword = ''
+    color.normal = ""
 
 parser = argparse.ArgumentParser(prog="nb", description="Nota Bene: an organizer for textual notes",
         formatter_class=argparse.RawDescriptionHelpFormatter,
@@ -94,17 +116,21 @@ There are several ways to use nb.  Try 'nb -h' for some hints.  The most common 
 The ~/.nbrc file may be used for customization, and may contain e.g. the
 following:
 
-    db = \"~/Dropbox/nb.db\"
-    pretty = \"oneline\"
-    showID = False         # set True to see database ID numbers in listings
-    debug = False          # set True (or use --debug flag) to turn on debugging
-    colourize = True       # set False to avoid colours (optionally customized as below)
-                           # Colours (as below) are specified with just the suffix part,
-                           # e.g. "36m" stands for "\\033[36m". To learn about colours,
-                           # see e.g.  http://en.wikipedia.org/wiki/ANSI_escape_code
-    colours.hash = "36m"   # darkcyan
-    colours.title = "1m"   # bold
-    colours.keyword = "4m" # underline
+    db = \"~/Dropbox/nb.db\" # this permits the use of different files
+    pretty = \"oneline\" # no other option
+    show_id = False      # (only for developer) show database key in listings
+    debug = False        # set True (or use --debug flag) to turn on debugging
+    color = True         # set False to avoid colors (optionally customized as below)
+                         # Colours (as below) are specified with just the suffix part,
+                         # e.g. "36m" stands for "\\033[36m". 
+                         #
+                         # It is also possible to specify a color scheme, with the 
+                         # choices being as follows (SUBJECT TO CHANGE!)
+                         #   color = "dk1"
+                         #   color = "cr1"
+    color.hash = "36m"   # darkcyan;  see http://en.wikipedia.org/wiki/ANSI_escape_code
+    color.title = "1m"   # bold;      see http://en.wikipedia.org/wiki/ANSI_escape_code
+    color.keyword = "4m" # underline; see http://en.wikipedia.org/wiki/ANSI_escape_code
     '''))
 
 parser.add_argument("hash", nargs="?", default="", help="abbreviated hash to search for", metavar="hash")
@@ -136,8 +162,6 @@ args = parser.parse_args()
 args.keywordsoriginal = args.keywords
 args.keywords = args.keywords.split(',')
 
-#showID = get_from_dotfile("~/.nbrc", "showID", False)
-#debug = get_from_dotfile("~/.nbrc", "debug", None)
             
 if not args.debug:
     args.debug = debug
@@ -155,7 +179,7 @@ if args.hints:
 
 # look in ~/.nbrc to see if a database is named there
 if not args.pretty:
-    args.pretty = get_from_dotfile("~/.nbrc", "pretty", "all")
+    args.pretty = get_from_dotfile("~/.nbrc", "pretty", "oneline")
 
 if args.developer:
     nb.warning("--developer does nothing at the present time")
@@ -368,18 +392,29 @@ else: # By a process of elimination, we must be trying to find notes.
             print(f['content'].lstrip())
         else:
             if args.pretty == "oneline" and nfound > 1:
-                print(colours.hash + ("%s: " % hash[i]) + colours.normal, end="")
-                if showID:
+                print(color.hash + ("%s: " % hash[i]) + color.normal, end="")
+                if show_id:
                     print("(%s) " % f['noteId'], end="")
-                print(colours.title + "%s " % f['title'] + colours.normal, end="")
-                # FIXME: colours.keyword is being ignored
-                print("[", ", ".join(f['keywords'][i] for i in range(len(f['keywords']))), "]",end='\n')
+                print(color.title + "%s" % f['title'] + color.normal + " ", end="")
+                print("[", end="")
+                nk = len(f['keywords'])
+                for i in range(nk):
+                    print(color.keyword + f['keywords'][i] + color.normal, end="")
+                    if (i < nk-1):
+                        print(", ", end="")
+                print("]", end="\n")
             else:
-                print(colours.hash + "%s: " % hash[i] + colours.normal, end="")
-                if showID:
+                print(color.hash + "%s: " % hash[i] + color.normal, end="")
+                if show_id:
                     print("(%s) " % f['noteId'], end="")
-                print(colours.title + "%s" % f['title'] + colours.normal, end="")
-                print("", "[", ", ".join(f['keywords'][i] for i in range(len(f['keywords']))), "]",end='\n')
+                print(color.title + "%s" % f['title'] + color.normal + " ", end="")
+                print("[", end="")
+                nk = len(f['keywords'])
+                for i in range(nk):
+                    print(color.keyword + f['keywords'][i] + color.normal, end="")
+                    if (i < nk-1):
+                        print(", ", end="")
+                print("]", end="\n")
                 #this commented-out block shows how to e.g. show just hour of day.
                 #created = f['date']
                 #dan = datetime.datetime.strptime(created, "%Y-%m-%d %H:%M:%S")
