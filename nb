@@ -344,17 +344,8 @@ else: # By a process of elimination, we must be trying to find notes.
     # Single hashes are printed to 7 chars (like on github), but multiple ones are shortened.
     hal = nb.hash_abbreviation_length()
     hash = []
-    if nfound > 1:
-        for f in found:
-            if args.debug:
-                print("hash %s" % f['hash'])
-            hash.append(f['hash'][0:hal])
-    elif nfound == 1:
-        for f in found:
-            hash.append(f['hash'][0:7])
-    else:
-        print("no notes")
-        found = []
+    if nfound < 1:
+        print("No notes match this request")
     if args.debug:
         print(hash)
     for f in found:
